@@ -3,7 +3,7 @@ package controller
 import (
 	"net/http"
 	"strconv"
-	"sync/atomic"
+	// "sync/atomic"
 
 	"github.com/RaymondCode/simple-demo/lib"
 	"github.com/RaymondCode/simple-demo/model"
@@ -23,7 +23,7 @@ var usersLoginInfo = map[string]User{
 	},
 }
 
-var userIdSequence = int64(1)
+// var userIdSequence = int64(1)
 
 type UserLoginResponse struct {
 	Response
@@ -33,7 +33,7 @@ type UserLoginResponse struct {
 
 type UserResponse struct {
 	Response
-	User User `json:"user"`
+	User model.User `json:"user"`
 }
 
 func Register(c *gin.Context) {
@@ -42,51 +42,66 @@ func Register(c *gin.Context) {
 
 	token := username + password
 
-	if _, exist := usersLoginInfo[token]; exist {
+	id, _ := lib.GetKey(token)
+
+	if _, exist := model.QueryUserExists(id); exist {
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "User already exist"},
 		})
 	} else {
-		atomic.AddInt64(&userIdSequence, 1)
-		newUser := User{
-			Id:   userIdSequence,
-			Name: username,
+		// 创建新用户
+		newUser:=model.CreateUser(username,password)
+		//存入redis
+		if err := lib.SetKey(token, strconv.Itoa(int(newUser.Id)), 3600); err != nil {
+			return
 		}
-		usersLoginInfo[token] = newUser
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 0},
-			UserId:   userIdSequence,
+			UserId:   newUser.Id,
 			Token:    username + password,
 		})
 	}
+
+	// if _, exist := usersLoginInfo[token]; exist {
+	// 	c.JSON(http.StatusOK, UserLoginResponse{
+	// 		Response: Response{StatusCode: 1, StatusMsg: "User already exist"},
+	// 	})
+	// } else {
+	// 	atomic.AddInt64(&userIdSequence, 1)
+	// 	newUser := User{
+	// 		Id:   userIdSequence,
+	// 		Name: username,
+	// 	}
+	// 	usersLoginInfo[token] = newUser
+	// 	c.JSON(http.StatusOK, UserLoginResponse{
+	// 		Response: Response{StatusCode: 0},
+	// 		UserId:   userIdSequence,
+	// 		Token:    username + password,
+	// 	})
+	// }
 }
 
 func Login(c *gin.Context) {
 	username := c.Query("username")
 	password := c.Query("password")
 
-	// token := username + password
-	token:="zhangleidouyin"
+	token := username + password
+	// token:="zhangleidouyin"
 
-	id := model.VerifyPasswd(username, password)
+	user := model.VerifyPasswd(username, password)
 
-	
-	// c.JSON(http.StatusOK, UserLoginResponse{
-	// 	Response: Response{StatusCode: 1, StatusMsg: strconv.Itoa(int(id))},
-	// })
-
-	if id == 0 {
+	if user == nil {
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
 		})
 	} else {
 		//存入redis
-		if err := lib.SetKey(token, strconv.Itoa(int(id)), 24*3600); err != nil {
+		if err := lib.SetKey(token, strconv.Itoa(int(user.Id)), 3600); err != nil {
 			return
 		}
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 0},
-			UserId:   id,
+			UserId:   user.Id,
 			Token:    token,
 		})
 	}
@@ -107,14 +122,26 @@ func Login(c *gin.Context) {
 func UserInfo(c *gin.Context) {
 	token := c.Query("token")
 
-	if user, exist := usersLoginInfo[token]; exist {
+	id, _ := lib.GetKey(token)
+
+	if user, exist := model.QueryUserExists(id); exist {
 		c.JSON(http.StatusOK, UserResponse{
 			Response: Response{StatusCode: 0},
-			User:     user,
+			User:     *user,
 		})
 	} else {
 		c.JSON(http.StatusOK, UserResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
 		})
 	}
+	// if user, exist := usersLoginInfo[token]; exist {
+	// 	c.JSON(http.StatusOK, UserResponse{
+	// 		Response: Response{StatusCode: 0},
+	// 		User:     user,
+	// 	})
+	// } else {
+	// 	c.JSON(http.StatusOK, UserResponse{
+	// 		Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
+	// 	})
+	// }
 }

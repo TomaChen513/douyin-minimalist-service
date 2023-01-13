@@ -1,6 +1,8 @@
 package model
 
 import (
+	"strconv"
+
 	"github.com/RaymondCode/simple-demo/model/mysql"
 	"github.com/jinzhu/gorm"
 )
@@ -15,22 +17,30 @@ type User struct {
 }
 
 // 查询判断用户是否存在
-func QueryUserExists(id string) bool {
+func QueryUserExists(id string) (*User,bool) {
 	var user User
-	mysql.DB.Find(&user, "id = ?", id)
+	intId,_:=strconv.Atoi(id)
+	mysql.DB.Find(&user, "id = ?", int64(intId))
 	if user.Id == 0 {
-		return false
+		return nil,false
 	}
-	return true
+	return &user,true
 }
 
-func VerifyPasswd(userName, passWord string) int64 {
-	var user []User
+func VerifyPasswd(userName, passWord string) *User {
+	var user User
 	err := mysql.DB.Model(&User{}).
 		Where(&User{Name: userName, Password: passWord}).
 		Find(&user).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
-		return 0
+		return nil
 	}
-	return user[0].Id
+	return &user
 }
+
+func CreateUser(username,password string) *User{ 
+	user:=User{Name: username,Password: password}
+	mysql.DB.Create(&user)
+	return &user
+}
+

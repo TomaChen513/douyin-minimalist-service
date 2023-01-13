@@ -38,7 +38,7 @@ https://bytedance.feishu.cn/docs/doccnM9KkBAdyDhg8qaeGlIz7S7
 https://www.apifox.cn/apidoc/shared-09d88f32-0b6c-4157-9d07-a36d32d7a75c/api-50707530
 
 
-###目录说明
+### 目录说明
 
 conf:配置文件
 
@@ -49,3 +49,10 @@ public：视频文件
 router:路由
 
 service:通信服务
+
+### 进度汇总
+
+重构了代码架构以及添加了mysql、redis数据库
+
+添加了用户注册、登录、信息的路由,提出了相关issure
+
