@@ -1,9 +1,13 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 	"sync/atomic"
+
+	"github.com/RaymondCode/simple-demo/lib"
+	"github.com/RaymondCode/simple-demo/model"
+	"github.com/gin-gonic/gin"
 )
 
 // usersLoginInfo use map to store user info, and key is username+password for demo
@@ -61,19 +65,43 @@ func Login(c *gin.Context) {
 	username := c.Query("username")
 	password := c.Query("password")
 
-	token := username + password
+	// token := username + password
+	token:="zhangleidouyin"
 
-	if user, exist := usersLoginInfo[token]; exist {
-		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{StatusCode: 0},
-			UserId:   user.Id,
-			Token:    token,
-		})
-	} else {
+	id := model.VerifyPasswd(username, password)
+
+	
+	// c.JSON(http.StatusOK, UserLoginResponse{
+	// 	Response: Response{StatusCode: 1, StatusMsg: strconv.Itoa(int(id))},
+	// })
+
+	if id == 0 {
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
 		})
+	} else {
+		//存入redis
+		if err := lib.SetKey(token, strconv.Itoa(int(id)), 24*3600); err != nil {
+			return
+		}
+		c.JSON(http.StatusOK, UserLoginResponse{
+			Response: Response{StatusCode: 0},
+			UserId:   id,
+			Token:    token,
+		})
 	}
+
+	// if user, exist := usersLoginInfo[token]; exist {
+	// 	c.JSON(http.StatusOK, UserLoginResponse{
+	// 		Response: Response{StatusCode: 0},
+	// 		UserId:   user.Id,
+	// 		Token:    token,
+	// 	})
+	// } else {
+	// 	c.JSON(http.StatusOK, UserLoginResponse{
+	// 		Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
+	// 	})
+	// }
 }
 
 func UserInfo(c *gin.Context) {

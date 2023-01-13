@@ -1,16 +1,24 @@
 package main
 
 import (
+	"log"
+
+	"github.com/RaymondCode/simple-demo/lib"
+	"github.com/RaymondCode/simple-demo/model/mysql"
+	"github.com/RaymondCode/simple-demo/router"
 	"github.com/RaymondCode/simple-demo/service"
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	go service.RunMessageServer()
 
-	r := gin.Default()
+	serverConfig := lib.LoadServerConfig()
+	mysql.InitDB(serverConfig)
+	defer mysql.DB.Close()
 
-	initRouter(r)
+	r := router.SetupRoute()
 
-	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	if err := r.Run(); err != nil {
+		log.Fatal("服务器启动失败...")
+	}
 }
