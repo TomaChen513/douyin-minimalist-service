@@ -1,7 +1,6 @@
 package model
 
 import (
-	"strconv"
 
 	"github.com/RaymondCode/simple-demo/model/mysql"
 	"github.com/jinzhu/gorm"
@@ -17,10 +16,9 @@ type User struct {
 }
 
 // 查询判断用户是否存在
-func QueryUserExists(id string) (*User,bool) {
+func QueryUserExists(id int64) (*User,bool) {
 	var user User
-	intId,_:=strconv.Atoi(id)
-	mysql.DB.Find(&user, "id = ?", int64(intId))
+	mysql.DB.Find(&user, "id = ?", id)
 	if user.Id == 0 {
 		return nil,false
 	}

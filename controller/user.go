@@ -2,10 +2,8 @@ package controller
 
 import (
 	"net/http"
-	"strconv"
 	// "sync/atomic"
 
-	"github.com/RaymondCode/simple-demo/lib"
 	"github.com/RaymondCode/simple-demo/model"
 	"github.com/gin-gonic/gin"
 )
@@ -21,6 +19,12 @@ var usersLoginInfo = map[string]User{
 		FollowerCount: 5,
 		IsFollow:      true,
 	},
+}
+
+
+// 取消了redis存储，采用map直接存储，在服务重启后清空
+var userToken =map[string]int64{
+	"zhangleidouyin":1,
 }
 
 // var userIdSequence = int64(1)
@@ -42,7 +46,9 @@ func Register(c *gin.Context) {
 
 	token := username + password
 
-	id, _ := lib.GetKey(token)
+	// id, _ := lib.GetKey(token)
+	// 用map来提取id
+	id:=userToken[token]
 
 	if _, exist := model.QueryUserExists(id); exist {
 		c.JSON(http.StatusOK, UserLoginResponse{
@@ -51,10 +57,13 @@ func Register(c *gin.Context) {
 	} else {
 		// 创建新用户
 		newUser:=model.CreateUser(username,password)
-		//存入redis
-		if err := lib.SetKey(token, strconv.Itoa(int(newUser.Id)), 3600); err != nil {
-			return
-		}
+		// //存入redis
+		// if err := lib.SetKey(token, strconv.Itoa(int(newUser.Id)), 3600); err != nil {
+		// 	return
+		// }
+		// 将redis改为map
+		userToken[token]=newUser.Id
+
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 0},
 			UserId:   newUser.Id,
@@ -90,15 +99,18 @@ func Login(c *gin.Context) {
 
 	user := model.VerifyPasswd(username, password)
 
+
 	if user == nil {
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
 		})
 	} else {
 		//存入redis
-		if err := lib.SetKey(token, strconv.Itoa(int(user.Id)), 3600); err != nil {
-			return
-		}
+		// if err := lib.SetKey(token, strconv.Itoa(int(user.Id)), 3600); err != nil {
+		// 	return
+		// }
+		userToken[token]=user.Id
+
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 0},
 			UserId:   user.Id,
@@ -122,7 +134,8 @@ func Login(c *gin.Context) {
 func UserInfo(c *gin.Context) {
 	token := c.Query("token")
 
-	id, _ := lib.GetKey(token)
+	// id, _ := lib.GetKey(token)
+	id:=userToken[token]
 
 	if user, exist := model.QueryUserExists(id); exist {
 		c.JSON(http.StatusOK, UserResponse{

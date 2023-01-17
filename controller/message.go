@@ -9,7 +9,13 @@ import (
 	"time"
 )
 
-var tempChat = map[string][]Message{}
+var tempChat = map[string][]Message{
+	"1_1": []Message{
+		{	Id: 1,
+			Content:    "hello",
+			CreateTime: "2023.1.16"},
+	},
+}
 
 var messageIdSequence = int64(1)
 
