@@ -5,10 +5,15 @@ type Response struct {
 	StatusMsg  string `json:"status_msg,omitempty"`
 }
 
+type CommonResponse struct {
+	Response
+	Common interface{} `json:"common"`
+}
+
 type Video struct {
 	Id            int64  `json:"id,omitempty"`
 	Author        User   `json:"author"`
-	PlayUrl       string `json:"play_url" json:"play_url,omitempty"`
+	PlayUrl       string `json:"play_url,omitempty"`
 	CoverUrl      string `json:"cover_url,omitempty"`
 	FavoriteCount int64  `json:"favorite_count,omitempty"`
 	CommentCount  int64  `json:"comment_count,omitempty"`
@@ -36,13 +41,4 @@ type Message struct {
 	CreateTime string `json:"create_time,omitempty"`
 }
 
-type MessageSendEvent struct {
-	UserId     int64  `json:"user_id,omitempty"`
-	ToUserId   int64  `json:"to_user_id,omitempty"`
-	MsgContent string `json:"msg_content,omitempty"`
-}
 
-type MessagePushEvent struct {
-	FromUserId int64  `json:"user_id,omitempty"`
-	MsgContent string `json:"msg_content,omitempty"`
-}
