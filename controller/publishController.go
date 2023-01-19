@@ -2,14 +2,19 @@ package controller
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"path/filepath"
+	"strconv"
+
+	"github.com/RaymondCode/simple-demo/lib"
+	"github.com/RaymondCode/simple-demo/model"
+	"github.com/RaymondCode/simple-demo/service"
+	"github.com/gin-gonic/gin"
 )
 
 type VideoListResponse struct {
 	Response
-	VideoList []Video `json:"video_list"`
+	VideoList []service.Video `json:"video_list"`
 }
 
 // Publish check token then save upload file to public directory
@@ -48,12 +53,37 @@ func Publish(c *gin.Context) {
 	})
 }
 
-// PublishList all users have same publish video list
+// 获得用户发布信息 GET /douyin/publish/list/
 func PublishList(c *gin.Context) {
-	c.JSON(http.StatusOK, VideoListResponse{
-		Response: Response{
-			StatusCode: 0,
-		},
-		VideoList: DemoVideos,
-	})
+	token := c.Query("token")
+	userId:=c.Query("user_id")
+	id,_:=strconv.ParseInt(userId,10,64)
+
+	vsi:=service.VideoServiceImpl{}
+
+
+	// 验证token
+	tId,_:=lib.GetKey(token)
+	tokenId,_:=strconv.ParseInt(tId,10,64)
+	if id!= tokenId{
+		c.JSON(http.StatusOK, UserResponse{
+			Response: Response{StatusCode: 1, StatusMsg: "用户id与token信息不一致！"},
+		})
+		return
+	}
+
+	if _,err:=model.GetUserById(id);err!=nil {
+		c.JSON(http.StatusOK, UserResponse{
+			Response: Response{StatusCode: 1, StatusMsg: "用户不存在"},
+		})
+	}else{
+		videoList,_:=vsi.GetVideosByUser(id)
+		c.JSON(http.StatusOK, VideoListResponse{
+			Response: Response{
+				StatusCode: 0,
+			},
+			VideoList: videoList,
+		})
+	}
+
 }

@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/RaymondCode/simple-demo/lib"
-	"github.com/RaymondCode/simple-demo/model"
 	"github.com/RaymondCode/simple-demo/service"
 	"github.com/gin-gonic/gin"
 )
@@ -32,7 +31,7 @@ type UserLoginResponse struct {
 
 type UserResponse struct {
 	Response
-	User model.User `json:"user"`
+	User service.User `json:"user"`
 }
 
 // Register POST douyin/user/register/ 用户注册
@@ -40,9 +39,10 @@ func Register(c *gin.Context) {
 	username := c.Query("username")
 	password := c.Query("password")
 
+	usi:=service.UserServiceImpl{}
 
 	// 根据注册的用户名查找是否有相同用户
-	user, _ := model.GetUserByName(username)
+	user, _ := usi.GetUserByName(username)
 
 	// 重名情况
 	if user.Name == username {
@@ -51,12 +51,12 @@ func Register(c *gin.Context) {
 		})
 	} else {
 		// 创建新用户
-		newUser := model.User{Name: username, Password: password}
-		if !model.InsertUser(newUser) {
+		newUser := service.User{Name: username}
+		if !usi.InsertUser(newUser,password) {
 			log.Println("创建新用户失败")
 			return
 		}
-		newUser,_ = model.GetUserByName(newUser.Name)
+		newUser,_ = usi.GetUserByName(newUser.Name)
 		// 产生新token
 		token,_ := service.ReleaseToken(newUser)
 		// 将token存入redis
@@ -77,8 +77,11 @@ func Login(c *gin.Context) {
 	username := c.Query("username")
 	password := c.Query("password")
 
-	user, err := model.GetUserByName(username)
+	usi:=service.UserServiceImpl{}
 
+	user, err := usi.GetUserByName(username)
+
+	
 	// 若用户不存在
 	if err != nil {
 		c.JSON(http.StatusOK, UserLoginResponse{
@@ -88,7 +91,7 @@ func Login(c *gin.Context) {
 	}
 
 	// 验证密码
-	if user.Password == password {
+	if  usi.ValidPassword(user.Id,password){
 		// 分发token
 		token,_ := service.ReleaseToken(user)
 		// 存入redis
@@ -108,23 +111,25 @@ func Login(c *gin.Context) {
 	}
 }
 
-// 获得用户信息
+// 获得用户信息 GET /douyin/user/
 func UserInfo(c *gin.Context) {
 	token := c.Query("token")
 	userId:=c.Query("user_id")
 	id,_:=strconv.ParseInt(userId,10,64)
+
+	usi:=service.UserServiceImpl{}
 
 	// 验证token
 	tId,_:=lib.GetKey(token)
 	tokenId,_:=strconv.ParseInt(tId,10,64)
 	if id!= tokenId{
 		c.JSON(http.StatusOK, UserResponse{
-			Response: Response{StatusCode: 1, StatusMsg: "用户鉴权失败！"},
+			Response: Response{StatusCode: 1, StatusMsg: "用户id与token信息不一致！"},
 		})
 		return
 	}
 
-	if user,err:=model.GetUserById(id);err!=nil {
+	if user,err:=usi.GetUserById(id);err!=nil {
 		c.JSON(http.StatusOK, UserResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "用户不存在"},
 		})

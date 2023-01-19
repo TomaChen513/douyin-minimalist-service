@@ -7,7 +7,7 @@ import (
 	"github.com/RaymondCode/simple-demo/model/mysql"
 )
 
-type User struct {
+type TableUser struct {
 	Id            int64  `gorm:"primarykey" json:"id,omitempty"`
 	Name          string `gorm:"type:varchar(255)" json:"name,omitempty"`
 	Password      string `gorm:"type:varchar(20)" json:"password,omitempty"`
@@ -16,9 +16,14 @@ type User struct {
 	IsFollow      bool   `json:"is_follow,omitempty"`
 }
 
+// TableName 修改表名映射
+func (tableUser TableUser) TableName() string {
+	return "user"
+}
+
 // 根据id查询用户是否存在
-func GetUserById(id int64) (User, error) {
-	user := User{}
+func GetUserById(id int64) (TableUser, error) {
+	user := TableUser{}
 	mysql.DB.First(&user, id)
 	if user.Id == 0 {
 		err := errors.New("找不到指定id的用户")
@@ -29,8 +34,8 @@ func GetUserById(id int64) (User, error) {
 }
 
 // 根据用户名获得user对象
-func GetUserByName(userName string) (User, error) {
-	user := User{}
+func GetUserByName(userName string) (TableUser, error) {
+	user := TableUser{}
 	if err := mysql.DB.Where("name = ?", userName).Find(&user).Error; err != nil {
 		log.Println(err.Error())
 		return user, err
@@ -39,7 +44,7 @@ func GetUserByName(userName string) (User, error) {
 }
 
 // 插入用户
-func InsertUser(user User) bool {
+func InsertUser(user TableUser) bool {
 	if err := mysql.DB.Create(&user).Error; err != nil {
 		log.Println(err.Error())
 		return false

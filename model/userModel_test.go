@@ -42,8 +42,8 @@ func TestGetUserByName(t *testing.T) {
 }
 
 func TestInsertUser(t *testing.T) {
-	flag:=InsertUser(User{Name: "tommm",Password: "chenxinyu"})
+	flag:=InsertUser(TableUser{Name: "tommm",Password: "chenxinyu"})
 	fmt.Printf("%v", flag)
-	flag=InsertUser(User{Name: "tommm",Password: "chenxinyu"})
+	flag=InsertUser(TableUser{Name: "tommm",Password: "chenxinyu"})
 	fmt.Printf("%v", flag)
 }

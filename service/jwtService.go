@@ -3,7 +3,6 @@ package service
 import (
 	"time"
 
-	"github.com/RaymondCode/simple-demo/model"
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -15,7 +14,8 @@ type Claims struct {
 }
 
 // ReleaseToken 颁发token
-func ReleaseToken(user model.User) (string, error) {
+func ReleaseToken(user User) (string, error) {
+	
 	expirationTime := time.Now().Add(7 * 24 * time.Hour)
 	claims := &Claims{
 		UserId: user.Id,
