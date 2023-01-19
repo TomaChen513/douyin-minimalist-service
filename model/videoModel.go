@@ -33,3 +33,12 @@ func GetVideosByUserId(userId int64) ([]TableVideo,error){
 	}
 	return videos, nil
 }
+
+func InsertVideo(tableVideo TableVideo)bool{
+	if err := mysql.DB.Create(&tableVideo).Error; err != nil {
+		log.Println(err.Error())
+		return false
+	}
+	return true
+}
+

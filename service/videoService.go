@@ -5,6 +5,7 @@ import "github.com/RaymondCode/simple-demo/model"
 
 type VideoService interface {
 	GetVideosByUser(userId int64) ([]Video,error)
+	InsertVideo(video Video) bool
 }
 
 type Video struct {
@@ -45,4 +46,18 @@ func (vsi *VideoServiceImpl)GetVideosByUser(userId int64) ([]Video,error){
 		videos[i].Title=tableVideos[i].Title
 	}
 	return videos,nil
+}
+
+func (vsi *VideoServiceImpl)InsertVideo(video Video)bool{
+	tableVideo:=model.TableVideo{
+		Id: video.Id,
+		Author: video.Author.Id,
+		PlayUrl: video.PlayUrl,
+		CoverUrl: video.CoverUrl,
+		FavoriteCount: video.FavoriteCount,
+		CommentCount: video.CommentCount,
+		IsFavorite: video.IsFavorite,
+		Title: video.Title,
+	}
+	return model.InsertVideo(tableVideo)
 }
