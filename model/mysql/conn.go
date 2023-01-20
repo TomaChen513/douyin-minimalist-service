@@ -20,6 +20,7 @@ func InitDB(conf lib.ServerConfig) {
 		conf.DbName,
 	)
 	DB, err = gorm.Open("mysql", dbParams)
+	
 	if err != nil {
 		log.Fatal(2, err)
 	}

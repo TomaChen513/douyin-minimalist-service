@@ -34,11 +34,19 @@ func GetVideosByUserId(userId int64) ([]TableVideo,error){
 	return videos, nil
 }
 
+// 插入视频信息
 func InsertVideo(tableVideo TableVideo)bool{
 	if err := mysql.DB.Create(&tableVideo).Error; err != nil {
 		log.Println(err.Error())
 		return false
 	}
 	return true
+}
+
+// 根据主键数组查找video
+func SelectVideosByPriArr(ids []int64) []TableVideo{
+	var tableVideo []TableVideo
+	mysql.DB.Find(&tableVideo,ids)
+	return tableVideo
 }
 

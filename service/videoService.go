@@ -1,11 +1,15 @@
 package service
 
-import "github.com/RaymondCode/simple-demo/model"
+import (
+	"github.com/RaymondCode/simple-demo/model"
+)
 
 
 type VideoService interface {
 	GetVideosByUser(userId int64) ([]Video,error)
 	InsertVideo(video Video) bool
+	FavouriteAction(userId,videoId int,actionType string) bool
+	GetFavouriteList(userId int64) ([]Video,error)
 }
 
 type Video struct {
@@ -60,4 +64,35 @@ func (vsi *VideoServiceImpl)InsertVideo(video Video)bool{
 		Title: video.Title,
 	}
 	return model.InsertVideo(tableVideo)
+}
+
+func (vsi *VideoServiceImpl)FavoriteAction(userId,videoId int64,actionType string) bool{
+	if actionType=="1" {
+		// 执行点赞
+		return model.InsertFavourite(model.TableFavourite{UserId: userId,VideoId: videoId})
+	}else if actionType=="2"{
+		// 执行取消点赞
+		return model.DeleteFavourite(model.TableFavourite{UserId: userId,VideoId: videoId})
+	}
+	return false
+}
+
+func (vsi *VideoServiceImpl) GetFavouriteList(userId int64) ([]Video,error){
+	// 查找所有该用户喜欢的视频下标
+	favouriteVideosId,_:=model.SelectVideosByUserId(userId)
+	// 封装成video类型返回
+	tableVideos:=model.SelectVideosByPriArr(favouriteVideosId)
+	videos:=make([]Video,len(tableVideos))
+	for i := 0; i < len(tableVideos); i++ {
+		user,_:=vsi.GetUserById(tableVideos[i].Id)
+		videos[i].Author=user
+		videos[i].Id=tableVideos[i].Id
+		videos[i].PlayUrl=tableVideos[i].PlayUrl
+		videos[i].CoverUrl=tableVideos[i].CoverUrl
+		videos[i].FavoriteCount=tableVideos[i].FavoriteCount
+		videos[i].CommentCount=tableVideos[i].CommentCount
+		videos[i].IsFavorite=tableVideos[i].IsFavorite
+		videos[i].Title=tableVideos[i].Title
+	}
+	return videos,nil
 }
