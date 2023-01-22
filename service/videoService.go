@@ -1,6 +1,8 @@
 package service
 
 import (
+	"time"
+
 	"github.com/RaymondCode/simple-demo/model"
 )
 
@@ -10,6 +12,7 @@ type VideoService interface {
 	InsertVideo(video Video) bool
 	FavouriteAction(userId,videoId int,actionType string) bool
 	GetFavouriteList(userId int64) ([]Video,error)
+	Feed(latestTimeStamp int64) ([]Video,int64,error)
 }
 
 type Video struct {
@@ -95,4 +98,27 @@ func (vsi *VideoServiceImpl) GetFavouriteList(userId int64) ([]Video,error){
 		videos[i].Title=tableVideos[i].Title
 	}
 	return videos,nil
+}
+
+func (vsi *VideoServiceImpl) Feed(latestTimeStamp int64) ([]Video,int64,error){
+	// 直接sql语句执行
+	latestTime:=time.Unix(latestTimeStamp, 0).Format("2006-01-02 15:04:05")
+	formatLatestTime, _ := time.Parse("2006-01-02 15:04:05", latestTime)
+	tableVideos,err:=model.GetVideosByLatestTime(formatLatestTime)
+	videos:=make([]Video,len(tableVideos))
+	if err!=nil {
+		return videos,0,err
+	}
+	for i := 0; i < len(tableVideos); i++ {
+		user,_:=vsi.GetUserById(tableVideos[i].Id)
+		videos[i].Author=user
+		videos[i].Id=tableVideos[i].Id
+		videos[i].PlayUrl=tableVideos[i].PlayUrl
+		videos[i].CoverUrl=tableVideos[i].CoverUrl
+		videos[i].FavoriteCount=tableVideos[i].FavoriteCount
+		videos[i].CommentCount=tableVideos[i].CommentCount
+		videos[i].IsFavorite=tableVideos[i].IsFavorite
+		videos[i].Title=tableVideos[i].Title
+	}
+	return videos,tableVideos[0].PublishTime.Unix(),nil
 }

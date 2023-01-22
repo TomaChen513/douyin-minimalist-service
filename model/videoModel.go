@@ -2,6 +2,7 @@ package model
 
 import (
 	"log"
+	"time"
 
 	"github.com/RaymondCode/simple-demo/model/mysql"
 )
@@ -16,6 +17,7 @@ type TableVideo struct {
 	CommentCount  int64  `json:"comment_count,omitempty"`
 	IsFavorite    bool   `json:"is_favorite,omitempty"`
 	Title string `gorm:"type:varchar(55)" json:"title,omitempty"`
+	PublishTime time.Time
 }
 
 // TableName 修改表名映射
@@ -50,3 +52,11 @@ func SelectVideosByPriArr(ids []int64) []TableVideo{
 	return tableVideo
 }
 
+func GetVideosByLatestTime(lastTime time.Time) ([]TableVideo,error){
+	var tableVideo []TableVideo
+	result := mysql.DB.Where("publish_time<?", lastTime).Order("publish_time desc").Limit(30).Find(&tableVideo)
+	if result.Error != nil {
+		return tableVideo, result.Error
+	}
+	return tableVideo, nil
+}
