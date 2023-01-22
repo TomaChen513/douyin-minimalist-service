@@ -11,6 +11,8 @@ type UserService interface {
 	GetUserByName(userName string) (User, error)
 	InsertUser(user User, password string) bool
 	ValidPassword(id int64, password string) bool
+	// 更新用户状态，1为添加关注，2为取消关注
+	UpdateFollow(userId, toUserId int64, typeAction string) bool
 }
 
 type User struct {
@@ -59,6 +61,13 @@ func (usi *UserServiceImpl) InsertUser(user User, password string) bool {
 func (usi *UserServiceImpl) ValidPassword(id int64, password string) bool {
 	tableUser, _ := model.GetUserById(id)
 	return tableUser.Password == password
+}
+
+func (usi *UserServiceImpl) UpdateFollow(userId, toUserId int64, typeAction string) bool {
+	if typeAction=="1" {
+		return	model.UpdateFollowAndFollowerCountIncr(userId,toUserId)
+	}
+	return model.UpdateFollowAndFollowerCountDecr(userId,toUserId)
 }
 
 // 将Table结构转换成json的结构

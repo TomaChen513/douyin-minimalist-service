@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/RaymondCode/simple-demo/model/mysql"
+	"github.com/jinzhu/gorm"
 )
 
 type TableUser struct {
@@ -50,4 +51,32 @@ func InsertUser(user TableUser) bool {
 		return false
 	}
 	return true
+}
+
+func UpdateFollowAndFollowerCountIncr(userId,toUserId int64)bool{
+	// user的follow+1,toUser的follower+1
+	err:=mysql.DB.Transaction(func(tx *gorm.DB) error {
+		if err:= tx.Exec("UPDATE user SET follow_count=follow_count+1 WHERE id = ?",userId).Error;err!=nil{
+			return err
+		}
+		if err:= tx.Exec("UPDATE user SET follower_count=follower_count+1 WHERE id = ?",toUserId).Error;err!=nil{
+			return err
+		}
+		return nil
+	})
+	return err==nil
+}
+
+func UpdateFollowAndFollowerCountDecr(userId,toUserId int64)bool{
+	// 没有考虑关注为0的情况
+	err:=mysql.DB.Transaction(func(tx *gorm.DB) error {
+		if err:= tx.Exec("UPDATE user SET follow_count=follow_count-1 WHERE id = ?",userId).Error;err!=nil{
+			return err
+		}
+		if err:= tx.Exec("UPDATE user SET follower_count=follower_count-1 WHERE id = ?",toUserId).Error;err!=nil{
+			return err
+		}
+		return nil
+	})
+	return err==nil
 }

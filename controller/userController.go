@@ -13,15 +13,15 @@ import (
 // usersLoginInfo use map to store user info, and key is username+password for demo
 // user data will be cleared every time the server starts
 // test data: username=zhanglei, password=douyin
-var usersLoginInfo = map[string]User{
-	"zhangleidouyin": {
-		Id:            1,
-		Name:          "zhanglei",
-		FollowCount:   10,
-		FollowerCount: 5,
-		IsFollow:      true,
-	},
-}
+// var usersLoginInfo = map[string]User{
+// 	"zhangleidouyin": {
+// 		Id:            1,
+// 		Name:          "zhanglei",
+// 		FollowCount:   10,
+// 		FollowerCount: 5,
+// 		IsFollow:      true,
+// 	},
+// }
 
 type UserLoginResponse struct {
 	Response
@@ -49,6 +49,7 @@ func Register(c *gin.Context) {
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "用户已经存在"},
 		})
+		return
 	} else {
 		// 创建新用户
 		newUser := service.User{Name: username}

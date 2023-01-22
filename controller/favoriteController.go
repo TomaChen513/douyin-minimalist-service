@@ -22,9 +22,7 @@ func FavoriteAction(c *gin.Context) {
 	// 验证token
 	tId, err := lib.GetKey(token)
 	if err != nil {
-		c.JSON(http.StatusOK, UserResponse{
-			Response: Response{StatusCode: 1, StatusMsg: "token信息有误！"},
-		})
+		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "token信息有误！"})
 		return
 	}
 	uId, _ := strconv.ParseInt(tId, 10, 64)
