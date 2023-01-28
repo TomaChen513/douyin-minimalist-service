@@ -1,0 +1,55 @@
+package controller
+
+import (
+	"net/http"
+
+	"github.com/RaymondCode/simple-demo/service"
+	"github.com/gin-gonic/gin"
+)
+
+type UserLoginResponse struct {
+	Response
+	UserId int64  `json:"user_id,omitempty"`
+	Token  string `json:"token"`
+}
+
+type UserResponse struct {
+	Response
+	User service.User `json:"user"`
+}
+
+// Login POST douyin/user/login/ 用户登录
+func Login(c *gin.Context) {
+	username := c.Query("username")
+	password := c.Query("password")
+
+	// 新建用户实例
+	usi := service.UserServiceImpl{}
+
+	// 根据用户姓名获得密码
+	user, err := usi.GetUserByName(username)
+
+	// 若用户不存在
+	if err != nil {
+		c.JSON(http.StatusOK, UserLoginResponse{
+			Response: Response{StatusCode: 1, StatusMsg: "用户不存在"},
+		})
+		return
+	}
+
+	// 与传入的密码进行验证
+	if usi.ValidPassword(user.Id, password) {
+		// 验证成功则分发jwt token
+		token, _ := service.ReleaseToken(user)
+
+		c.JSON(http.StatusOK, UserLoginResponse{
+			Response: Response{StatusCode: 0},
+			UserId:   user.Id,
+			Token:    token,
+		})
+	} else {
+		c.JSON(http.StatusOK, UserLoginResponse{
+			Response: Response{StatusCode: 1, StatusMsg: "密码错误"},
+		})
+	}
+}

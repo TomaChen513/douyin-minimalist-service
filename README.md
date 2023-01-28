@@ -1,21 +1,43 @@
 # simple-demo
 
-## 抖音项目服务端简单示例
+### 说明
 
-具体功能内容参考飞书说明文档
+router注册路由，controller层按模块分为五个文件，各自负责各自的部分。
 
-工程无其他依赖，直接编译运行即可
+controller命名规则：模块名加Controller，例如：videoController.go
 
-```shell
-go build && ./simple-demo
-```
+service,model 命名规则同上。
 
-### 功能说明
+以“POST douyin/user/login/ 用户登录” 举例：
 
-接口功能不完善，仅作为示例
+userController.go调用userService.go,userService.go调用userModel.go
 
-* 用户登录数据保存在内存中，单次运行过程中有效
-* 视频上传后会保存到本地 public 目录中，访问时用 127.0.0.1:8080/static/video_name 即可
+其中userModel直接与数据库进行交互。数据库已经配置为远程服务器。
+
+在开发过程中，若要使用token获取id，使用jwtService的ParseToken即可，具体使用可见jwt测试文件。可以参考我的dev分支写，或者那个优秀项目写。
+
+
+### 项目运行
+
+go mod tidy
+
+go run main.go
+
+使用任意api测试软件即可测试如下接口(POST)：
+
+http://localhost:8080/douyin/user/login/?username=test&password=test
+
+
+### 目录说明
+
+conf:配置文件
+
+lib:工具类函数
+
+public：视频本地存储文件
+
+router:路由
+
 
 ### 测试
 
@@ -38,17 +60,7 @@ https://bytedance.feishu.cn/docs/doccnM9KkBAdyDhg8qaeGlIz7S7
 https://www.apifox.cn/apidoc/shared-09d88f32-0b6c-4157-9d07-a36d32d7a75c/api-50707530
 
 
-### 目录说明
 
-conf:配置文件
-
-lib:配置加载及redis
-
-public：视频文件
-
-router:路由
-
-service:通信服务
 
 ### 进度汇总
 
