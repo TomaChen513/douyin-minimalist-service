@@ -67,3 +67,19 @@ func (usi *UserServiceImpl) GetUserByName(userName string) (User, error) {
 		IsFollow:      false,
 	}, nil
 }
+
+// 根据id获得用户详细信息, curId表示当前登录的Id
+func GetUserInfoById(id, curId int64) User {
+	name := model.GetNameById(id)
+	followCount := model.GetFollowCount(id)
+	followerCount := model.GetFollowerCount(id)
+	isFollow := model.IsFollow(curId, id)
+
+	return User{
+		Id:            id,
+		Name:          name,
+		FollowCount:   followCount,
+		FollowerCount: followerCount,
+		IsFollow:      isFollow,
+	}
+}

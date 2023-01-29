@@ -40,3 +40,13 @@ func GetUserByName(userName string) (User, error) {
 	}
 	return user, nil
 }
+
+// 根据id获得name
+func GetNameById(id int64) string {
+	user := User{}
+	if err := mysql.DB.Where("id = ?", id).Find(&user).Error; err != nil {
+		log.Println(err.Error())
+		return ""
+	}
+	return user.Name
+}
