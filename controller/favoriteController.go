@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// 有重复点赞的bug， 在点赞前先查询数据库中是否已经存在记录
 // 点赞操作  POST /douyin/favorite/action/
 func FavoriteAction(c *gin.Context) {
 	// 使用mysql进行操作，性能极差，建议优化
@@ -15,7 +16,7 @@ func FavoriteAction(c *gin.Context) {
 	videoId := c.Query("video_id")
 	actionType := c.Query("action_type")
 	vId, _ := strconv.ParseInt(videoId, 10, 64)
-	uId,_:=strconv.ParseInt(userId,10,64)
+	uId, _ := strconv.ParseInt(userId, 10, 64)
 
 	fvsi := service.FavorServiceImpl{}
 
@@ -27,6 +28,7 @@ func FavoriteAction(c *gin.Context) {
 	c.JSON(http.StatusOK, Response{StatusCode: 0})
 }
 
+// 不知道为啥一直返回空数组， 可能我测试有问题
 // 喜欢列表 GET /douyin/favorite/list/
 func FavoriteList(c *gin.Context) {
 	userId := c.Query("user_id")

@@ -15,11 +15,16 @@ type Video struct {
 	PublishTime time.Time
 }
 
-func GetVideosById(videoId []int64) ([]Video,error){
+// TableName 修改表名映射
+func (Video) TableName() string {
+	return "videos"
+}
+
+func GetVideosById(videoId []int64) ([]Video, error) {
 	var videos []Video
-	if err:=mysql.DB.Find(&videos,videoId).Error;err!=nil {
+	if err := mysql.DB.Find(&videos, videoId).Error; err != nil {
 		log.Println(err.Error())
-		return []Video{},err
+		return []Video{}, err
 	}
-	return videos,nil
+	return videos, nil
 }
