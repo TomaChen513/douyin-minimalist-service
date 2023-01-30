@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"log"
 	"net/http"
 
+	"github.com/RaymondCode/simple-demo/model"
 	"github.com/RaymondCode/simple-demo/service"
 	"github.com/gin-gonic/gin"
 )
@@ -50,6 +52,41 @@ func Login(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "密码错误"},
+		})
+	}
+}
+
+// Register POST douyin/user/register/ 用户注册
+func Register(c *gin.Context) {
+	username := c.Query("username")
+	password := c.Query("password")
+
+	// 新建用户实例
+	usi := service.UserServiceImpl{}
+
+	// 根据用户姓名获得密码
+	user, _ := usi.GetUserByName(username)
+
+	if username == user.Name {
+		c.JSON(http.StatusOK, UserLoginResponse{
+			Response: Response{StatusCode: 1, StatusMsg: "User already exist"},
+		})
+	} else {
+		newUser := model.User{
+			Name: username,
+			// Password: service.EnCoder(password),
+			Password: password,
+		}
+		if !usi.InsertTableUser(&newUser) {
+			println("Insert Data Fail")
+		}
+		// u := usi.GetTableUserByUsername(username)
+		token, _ := service.ReleaseToken(user)
+		log.Println("注册返回的id: ", user.Id)
+		c.JSON(http.StatusOK, UserLoginResponse{
+			Response: Response{StatusCode: 0},
+			UserId:   user.Id,
+			Token:    token,
 		})
 	}
 }

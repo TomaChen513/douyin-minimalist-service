@@ -50,3 +50,12 @@ func GetNameById(id int64) string {
 	}
 	return user.Name
 }
+
+// InsertTableUser 将tableUser插入表内
+func InsertTableUser(tableUser *User) bool {
+	if err := mysql.DB.Create(&tableUser).Error; err != nil {
+		log.Println(err.Error())
+		return false
+	}
+	return true
+}

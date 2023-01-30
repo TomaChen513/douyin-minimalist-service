@@ -83,3 +83,13 @@ func GetUserInfoById(id, curId int64) User {
 		IsFollow:      isFollow,
 	}
 }
+
+// InsertTableUser 将tableUser插入表内
+func (usi *UserServiceImpl) InsertTableUser(User *model.User) bool {
+	flag := model.InsertTableUser(User)
+	if !flag {
+		log.Println("插入失败")
+		return false
+	}
+	return true
+}
