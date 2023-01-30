@@ -22,19 +22,19 @@ func (Follow) TableName() string {
 
 // 查询user是否关注follower
 func IsFollow(userId, followerId int64) bool {
-	follow := Follow{}
-	//关注返回true
+	var cnt int64
+
 	if err := mysql.DB.
+		Model(Follow{}).
 		Where("user_id = ?", userId).
 		Where("follower_id = ?", followerId).
 		Where("cancel = ?", 1).
-		First(&follow).Error; err != nil {
-
-		return follow.Cancel == 1
-		//没关注返回false
-	} else {
+		Count(&cnt).Error; err != nil {
 		log.Println(err.Error())
 		return false
+
+	} else {
+		return cnt != 0
 	}
 }
 
@@ -135,7 +135,7 @@ func GetFollowIds(userId int64) ([]int64, bool) {
 		Where("user_id = ?", userId).
 		Where("cancel = ?", 1).
 		Pluck("follower_id", &ids).Error; err != nil {
-		// 没有粉丝，但是不能算错。
+		// 没有粉丝，但是不能算错
 		if err.Error() == "record not found" {
 			return nil, true
 		}

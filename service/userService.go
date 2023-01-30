@@ -9,9 +9,9 @@ import (
 type User struct {
 	Id            int64  `json:"id,omitempty"`
 	Name          string `json:"name,omitempty"`
-	FollowCount   int64  `json:"follow_count,omitempty"`
-	FollowerCount int64  `json:"follower_count,omitempty"`
-	IsFollow      bool   `json:"is_follow,omitempty"`
+	FollowCount   int64  `json:"follow_count"`
+	FollowerCount int64  `json:"follower_count"`
+	IsFollow      bool   `json:"is_follow"`
 }
 
 // 用户服务接口
@@ -71,21 +71,25 @@ func (usi *UserServiceImpl) GetUserByName(userName string) (User, error) {
 // 根据id获得用户详细信息, curId表示当前登录的Id
 func GetUserInfoById(id, curId int64) (User, bool) {
 	name := model.GetNameById(id)
+	//println(name)
 	if name == "" {
 		return User{}, false
 	}
 
 	followCount := model.GetFollowCount(id)
+	//println(followCount)
 	if followCount == -1 {
 		return User{}, false
 	}
 
 	followerCount := model.GetFollowerCount(id)
+	//println(followerCount)
 	if followerCount == -1 {
 		return User{}, false
 	}
 
 	isFollow := model.IsFollow(curId, id)
+	println(isFollow)
 	if !isFollow {
 		return User{}, false
 	}
@@ -97,11 +101,12 @@ func GetUserInfoById(id, curId int64) (User, bool) {
 		FollowerCount: followerCount,
 		IsFollow:      isFollow,
 	}, true
+	//return User{}, true
 }
 
 // 根据ids获取users, curId表示当前用户id
 func GetUsersByids(ids []int64, curId int64) ([]User, bool) {
-	var users []User
+	var users = make([]User, 0, len(ids))
 
 	for _, id := range ids {
 		if user, ok := GetUserInfoById(id, curId); !ok {
@@ -109,6 +114,7 @@ func GetUsersByids(ids []int64, curId int64) ([]User, bool) {
 		} else {
 			users = append(users, user)
 		}
+		println(id)
 	}
 
 	return users, true
