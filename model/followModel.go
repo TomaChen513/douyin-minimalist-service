@@ -26,7 +26,7 @@ func IsFollow(userId, followerId int64) bool {
 	//关注返回true
 	if err := mysql.DB.
 		Where("user_id = ?", userId).
-		Where("follow_id = ?", followerId).
+		Where("follower_id = ?", followerId).
 		Where("cancel = ?", 1).
 		First(&follow).Error; err != nil {
 
@@ -42,22 +42,20 @@ func IsFollow(userId, followerId int64) bool {
 func GetFollow(userId, followerId int64) int64 {
 	follow := Follow{}
 	//存在返回Id
-	if err := mysql.DB.
+	err := mysql.DB.
 		Where("user_id = ?", userId).
-		Where("follow_id = ?", followerId).
-		First(&follow).Error; err != nil {
-		return follow.Id
-		//不存在返回-1
-	} else {
-		log.Println(err.Error())
+		Where("follower_id = ?", followerId).
+		First(&follow).Error
+	if err != nil {
 		return -1
 	}
+	return follow.Id
 }
 
 // 插入一条新数据, 成功返回true， 失败返回false
 func InsertFollow(userId, followerId int64, cancel int8) bool {
 	follow := Follow{UserId: userId, FollowerId: followerId, Cancel: cancel}
-	if err := mysql.DB.Create(follow).Error; err != nil {
+	if err := mysql.DB.Create(&follow).Error; err != nil {
 		log.Println(err.Error())
 		return false
 	}

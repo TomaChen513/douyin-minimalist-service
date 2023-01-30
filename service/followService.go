@@ -1,6 +1,8 @@
 package service
 
-import "github.com/RaymondCode/simple-demo/model"
+import (
+	"github.com/RaymondCode/simple-demo/model"
+)
 
 // 关注/取消关注操作
 func FollowAction(userId, followId int64, cancel int8) bool {
