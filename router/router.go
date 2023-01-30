@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/RaymondCode/simple-demo/controller"
+	"github.com/RaymondCode/simple-demo/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,8 +22,9 @@ func SetupRoute() *gin.Engine {
 	// apiRouter.GET("/publish/list/", controller.PublishList)
 
 	// extra apis - I
-	// apiRouter.POST("/favorite/action/", controller.FavoriteAction)
-	// apiRouter.GET("/favorite/list/", controller.FavoriteList)
+
+	apiRouter.POST("/favorite/action/", middleware.JwtAuth(), controller.FavoriteAction)
+	apiRouter.GET("/favorite/list/", middleware.JwtAuth(), controller.FavoriteList)
 	// apiRouter.POST("/comment/action/", controller.CommentAction)
 	// apiRouter.GET("/comment/list/", controller.CommentList)
 
