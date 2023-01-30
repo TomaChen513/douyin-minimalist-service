@@ -7,33 +7,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// 关注操作
+// 关注操作 userId表示当前用户Id, followerId, 表示关注对象
 func RelationAction(c *gin.Context) {
-	//解析token
-	token, ok := service.ParseToken(c.Query("token"))
+	userId, err1 := strconv.ParseInt(c.GetString("userId"), 10, 64)
+	followerId, err2 := strconv.ParseInt(c.Query("to_user_id"), 10, 64)
+	cancel, err3 := strconv.ParseInt(c.Query("action_type"), 10, 64)
 
-	if !ok {
+	//判断参数格式
+	if err1 != nil || err2 != nil || err3 != nil {
 		c.JSON(200, gin.H{
 			"StatusCode": -1,
-			"StatusMsg":  "鉴权失败",
+			"StatusMsg":  "参数格式错误",
 		})
 	}
 
-	followerId, err1 := strconv.ParseInt(c.Query("to_user_id"), 10, 64)
-	cancel, err2 := strconv.ParseInt(c.Query("action_type"), 10, 64)
-
-	//判断参数格式
-	if err1 != nil || err2 != nil {
-		if !ok {
-			c.JSON(200, gin.H{
-				"StatusCode": -1,
-				"StatusMsg":  "用户id格式或行为格式错误",
-			})
-		}
-	}
-
 	//更新数据
-	if ok = service.FollowAction(token.UserId, followerId, int8(cancel)); !ok {
+	if ok := service.FollowAction(userId, followerId, int8(cancel)); !ok {
 		c.JSON(200, gin.H{
 			"StatusCode": -1,
 			"StatusMsg":  "更新数据失败",
@@ -46,29 +35,21 @@ func RelationAction(c *gin.Context) {
 	})
 }
 
+// 关注列表， curId当前登录用户id， userId查询对象
 func FollowList(c *gin.Context) {
-	//解析token
-	_, ok := service.ParseToken(c.Query("token"))
-
-	if !ok {
-		c.JSON(200, gin.H{
-			"StatusCode": -1,
-			"StatusMsg":  "鉴权失败",
-		})
-	}
-
-	userId, err := strconv.ParseInt(c.Query("to_user_id"), 10, 64)
+	curId, err1 := strconv.ParseInt(c.GetString("userId"), 10, 64)
+	userId, err2 := strconv.ParseInt(c.Query("to_user_id"), 10, 64)
 
 	//判断参数格式
-	if err != nil {
+	if err1 != nil || err2 != nil {
 		c.JSON(200, gin.H{
 			"StatusCode": -1,
-			"StatusMsg":  "用户id格式错误",
+			"StatusMsg":  "参数格式错误",
 			"user_list":  nil,
 		})
 	}
 
-	users, ok := service.GetFollowList(userId)
+	users, ok := service.GetFollowList(userId, curId)
 
 	if !ok {
 		c.JSON(200, gin.H{
@@ -85,29 +66,21 @@ func FollowList(c *gin.Context) {
 	})
 }
 
+// 粉丝列表， curId当前登录用户id， userId查询对象
 func FollowerList(c *gin.Context) {
-	//解析token
-	_, ok := service.ParseToken(c.Query("token"))
-
-	if !ok {
-		c.JSON(200, gin.H{
-			"StatusCode": -1,
-			"StatusMsg":  "鉴权失败",
-		})
-	}
-
-	userId, err := strconv.ParseInt(c.Query("to_user_id"), 10, 64)
+	curId, err1 := strconv.ParseInt(c.GetString("userId"), 10, 64)
+	userId, err2 := strconv.ParseInt(c.Query("to_user_id"), 10, 64)
 
 	//判断参数格式
-	if err != nil {
+	if err1 != nil || err2 != nil {
 		c.JSON(200, gin.H{
 			"StatusCode": -1,
-			"StatusMsg":  "用户id格式错误",
+			"StatusMsg":  "参数格式错误",
 			"user_list":  nil,
 		})
 	}
 
-	users, ok := service.GetFollowerList(userId)
+	users, ok := service.GetFollowerList(userId, curId)
 
 	if !ok {
 		c.JSON(200, gin.H{
