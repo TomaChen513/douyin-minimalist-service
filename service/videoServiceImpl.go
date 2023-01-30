@@ -133,7 +133,7 @@ func (videoService *VideoServiceImpl) copyVideos(result *[]Video, data *[]dao.Ta
 	return nil
 }
 
-//将video进行组装，添加想要的信息,插入从数据库中查到的数据
+// 将video进行组装，添加想要的信息,插入从数据库中查到的数据
 func (videoService *VideoServiceImpl) creatVideo(video *Video, data *dao.TableVideo, userId int64) {
 	//建立协程组，当这一组的携程全部完成后，才会结束本方法
 	var wg sync.WaitGroup
