@@ -23,7 +23,7 @@ func (Follow) TableName() string {
 // 查询user是否关注follower
 func IsFollow(userId, followerId int64) bool {
 	follow := Follow{}
-	//存在返回Id
+	//关注返回true
 	if err := mysql.DB.
 		Where("user_id = ?", userId).
 		Where("follow_id = ?", followerId).
@@ -31,7 +31,7 @@ func IsFollow(userId, followerId int64) bool {
 		First(&follow).Error; err != nil {
 
 		return follow.Cancel == 1
-		//不存在返回-1
+		//没关注返回false
 	} else {
 		log.Println(err.Error())
 		return false

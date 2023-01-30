@@ -69,11 +69,26 @@ func (usi *UserServiceImpl) GetUserByName(userName string) (User, error) {
 }
 
 // 根据id获得用户详细信息, curId表示当前登录的Id
-func GetUserInfoById(id, curId int64) User {
+func GetUserInfoById(id, curId int64) (User, bool) {
 	name := model.GetNameById(id)
+	if name == "" {
+		return User{}, false
+	}
+
 	followCount := model.GetFollowCount(id)
+	if followCount == -1 {
+		return User{}, false
+	}
+
 	followerCount := model.GetFollowerCount(id)
+	if followerCount == -1 {
+		return User{}, false
+	}
+
 	isFollow := model.IsFollow(curId, id)
+	if !isFollow {
+		return User{}, false
+	}
 
 	return User{
 		Id:            id,
@@ -81,7 +96,22 @@ func GetUserInfoById(id, curId int64) User {
 		FollowCount:   followCount,
 		FollowerCount: followerCount,
 		IsFollow:      isFollow,
+	}, true
+}
+
+// 根据ids获取users, curId表示当前用户id
+func GetUsersByids(ids []int64, curId int64) ([]User, bool) {
+	var users []User
+
+	for _, id := range ids {
+		if user, ok := GetUserInfoById(id, curId); !ok {
+			return nil, false
+		} else {
+			users = append(users, user)
+		}
 	}
+
+	return users, true
 }
 
 // InsertTableUser 将tableUser插入表内

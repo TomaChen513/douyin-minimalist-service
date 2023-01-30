@@ -11,3 +11,24 @@ func FollowAction(userId, followId int64, cancel int8) bool {
 		return model.InsertFollow(userId, followId, cancel)
 	}
 }
+
+// 获取关注列表, 失败返回false
+func GetFollowList(userId int64) ([]User, bool) {
+	ids, ok := model.GetFollowIds(userId)
+	if !ok {
+		return nil, false
+	}
+
+	return GetUsersByids(ids, userId)
+}
+
+// 获取粉丝列表, 失败返回false
+func GetFollowerList(userId int64) ([]User, bool) {
+	ids, ok := model.GetFollowerIds(userId)
+	if !ok {
+		return nil, false
+	}
+
+	return GetUsersByids(ids, userId)
+
+}
