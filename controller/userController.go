@@ -3,6 +3,7 @@ package controller
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/RaymondCode/simple-demo/model"
 	"github.com/RaymondCode/simple-demo/service"
@@ -87,6 +88,43 @@ func Register(c *gin.Context) {
 			Response: Response{StatusCode: 0},
 			UserId:   user.Id,
 			Token:    token,
+		})
+	}
+}
+
+// UserInfo GET douyin/user/ 用户信息
+func UserInfo(c *gin.Context) {
+	user_id := c.Query("user_id")
+	user_token := c.Query("token")
+
+	_, flag := service.ParseToken(user_token)
+	if !flag {
+		c.JSON(http.StatusUnauthorized, Response{
+			StatusCode: -1,
+			StatusMsg:  "Token Error",
+		})
+		return
+	}
+
+	id, _ := strconv.ParseInt(user_id, 10, 64)
+
+	// 新建用户实例
+	usi := service.UserServiceImpl{}
+
+	// usi := service.UserServiceImpl{
+	// 	FollowService: &service.FollowServiceImp{},
+	// 	LikeService:   &service.LikeServiceImpl{},
+	// }
+
+	u, err := usi.GetUserById(id)
+	if err != nil {
+		c.JSON(http.StatusOK, UserResponse{
+			Response: Response{StatusCode: 1, StatusMsg: "User Doesn't Exist"},
+		})
+	} else {
+		c.JSON(http.StatusOK, UserResponse{
+			Response: Response{StatusCode: 0},
+			User:     u,
 		})
 	}
 }
