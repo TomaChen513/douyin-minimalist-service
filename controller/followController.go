@@ -9,18 +9,29 @@ import (
 )
 
 // 关注操作 userId表示当前用户Id, followerId, 表示关注对象
-// 1. 没有考虑to_user_id不存在的情况  2. 可以直接取消关注，即用户没有关注的时候，都可以取关
+// 1. 没有考虑to_user_id不存在的情况(已修改)  2. 可以直接取消关注，即用户没有关注的时候，都可以取关（已修改）
 func RelationAction(c *gin.Context) {
 	user_id, _ := c.Get("userId")
 	userId := user_id.(int64)
-	followerId, err := strconv.ParseInt(c.Query("to_user_id"), 10, 64)
-	cancel, err3 := strconv.ParseInt(c.Query("action_type"), 10, 64)
+	followerId, err1 := strconv.ParseInt(c.Query("to_user_id"), 10, 64)
+	cancel, err2 := strconv.ParseInt(c.Query("action_type"), 10, 64)
 
 	//判断参数格式
-	if err != nil || err3 != nil {
+	if err1 != nil || err2 != nil {
 		c.JSON(200, gin.H{
 			"StatusCode": -1,
 			"StatusMsg":  "参数格式错误",
+		})
+		return
+	}
+
+	usi := service.UserServiceImpl{}
+	_, err3 := usi.GetUserById(followerId)
+
+	if err3 != nil {
+		c.JSON(200, gin.H{
+			"StatusCode": -1,
+			"StatusMsg":  "to_user_id不存在",
 		})
 		return
 	}
