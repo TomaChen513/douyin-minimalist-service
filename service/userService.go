@@ -69,7 +69,7 @@ func (usi *UserServiceImpl) GetUserByName(userName string) (User, error) {
 }
 
 // 根据id获得用户详细信息, curId表示当前登录的Id
-func GetUserInfoById(id, curId int64) (User, bool) {
+func (usi *UserServiceImpl) GetUserInfoById(id, curId int64) (User, bool) {
 	name := model.GetNameById(id)
 	//println(name)
 	if name == "" {
@@ -105,16 +105,16 @@ func GetUserInfoById(id, curId int64) (User, bool) {
 }
 
 // 根据ids获取users, curId表示当前用户id
-func GetUsersByids(ids []int64, curId int64) ([]User, bool) {
+func (usi *UserServiceImpl) GetUsersByids(ids []int64, curId int64) ([]User, bool) {
 	var users = make([]User, 0, len(ids))
 
 	for _, id := range ids {
-		if user, ok := GetUserInfoById(id, curId); !ok {
+		if user, ok := usi.GetUserInfoById(id, curId); !ok {
 			return nil, false
 		} else {
 			users = append(users, user)
 		}
-		println(id)
+		//println(id)
 	}
 
 	return users, true

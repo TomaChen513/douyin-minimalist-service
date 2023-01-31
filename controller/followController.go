@@ -25,8 +25,16 @@ func RelationAction(c *gin.Context) {
 		return
 	}
 
-	usi := service.UserServiceImpl{}
-	_, err3 := usi.GetUserById(followerId)
+	if userId == followerId {
+		c.JSON(200, gin.H{
+			"StatusCode": -1,
+			"StatusMsg":  "不能关注自己",
+		})
+		return
+	}
+
+	fsi := service.FollowServiceImp{}
+	_, err3 := fsi.GetUserById(followerId)
 
 	if err3 != nil {
 		c.JSON(200, gin.H{
@@ -37,7 +45,7 @@ func RelationAction(c *gin.Context) {
 	}
 
 	//更新数据
-	if ok := service.FollowAction(userId, followerId, int8(cancel)); !ok {
+	if ok := fsi.FollowAction(userId, followerId, int8(cancel)); !ok {
 		c.JSON(200, gin.H{
 			"StatusCode": -1,
 			"StatusMsg":  "更新数据失败",
@@ -58,7 +66,7 @@ func FollowList(c *gin.Context) {
 
 	userId, err := strconv.ParseInt(c.Query("user_id"), 10, 64)
 
-	println(curId, userId)
+	//println(curId, userId)
 
 	//判断参数格式
 	if !ok || err != nil {
@@ -71,7 +79,8 @@ func FollowList(c *gin.Context) {
 		return
 	}
 
-	users, ok := service.GetFollowList(userId, curId)
+	fsi := service.FollowServiceImp{}
+	users, ok := fsi.GetFollowList(userId, curId)
 
 	if !ok {
 		c.JSON(200, gin.H{
@@ -87,9 +96,6 @@ func FollowList(c *gin.Context) {
 		"StatusMsg":  "获取关注列表成功",
 		"user_list":  users,
 	})
-	// c.JSON(200, gin.H{
-	// 	"test": "11",
-	// })
 }
 
 // 粉丝列表， curId当前登录用户id， userId查询对象
@@ -107,7 +113,42 @@ func FollowerList(c *gin.Context) {
 		})
 	}
 
-	users, ok := service.GetFollowerList(userId, curId)
+	fsi := service.FollowServiceImp{}
+	users, ok := fsi.GetFollowerList(userId, curId)
+
+	if !ok {
+		c.JSON(200, gin.H{
+			"StatusCode": -1,
+			"StatusMsg":  "获取粉丝列表失败",
+			"user_list":  nil,
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"StatusCode": 0,
+		"StatusMsg":  "获取粉丝列表成功",
+		"user_list":  users,
+	})
+}
+
+// 好友列表, curId当前登录用户id, userId查询对象
+func FriendList(c *gin.Context) {
+	cur_id, ok := c.Get("userId")
+	curId := cur_id.(int64)
+	userId, err := strconv.ParseInt(c.Query("to_user_id"), 10, 64)
+
+	//判断参数格式
+	if !ok || err != nil {
+		c.JSON(200, gin.H{
+			"StatusCode": -1,
+			"StatusMsg":  "参数格式错误",
+			"user_list":  nil,
+		})
+	}
+
+	fsi := service.FollowServiceImp{}
+	users, ok := fsi.GetFriendList(userId, curId)
 
 	if !ok {
 		c.JSON(200, gin.H{

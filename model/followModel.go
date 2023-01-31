@@ -7,6 +7,7 @@ import (
 )
 
 // Follow 用户关系结构，对应用户关系表。
+// userid=1, followerid=2, cancel=1, 表示用户1关注用户2
 type Follow struct {
 	Id         int64 `gorm:"primaryKey"`
 	UserId     int64
@@ -144,5 +145,24 @@ func GetFollowIds(userId int64) ([]int64, bool) {
 		return nil, false
 	}
 	// 查询成功
+	return ids, true
+}
+
+// 获取好友id
+func GetFriendIds(userId int64) ([]int64, bool) {
+	followIds, ok := GetFollowIds(userId)
+
+	if !ok {
+		return nil, false
+	}
+
+	var ids = make([]int64, 0, len(followIds))
+
+	for _, id := range followIds {
+		if IsFollow(id, userId) {
+			ids = append(ids, id)
+		}
+	}
+
 	return ids, true
 }
