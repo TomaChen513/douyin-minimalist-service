@@ -3,10 +3,20 @@ package model
 import (
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/RaymondCode/simple-demo/lib"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 )
+
+type TableVideo struct {
+	Id          int64 `json:"id"`
+	AuthorId    int64
+	PlayUrl     string `json:"play_url"`
+	CoverUrl    string `json:"cover_url"`
+	PublishTime time.Time
+	Title       string `json:"title"` //视频名，5.23添加
+}
 
 func VideoOss(file io.Reader, videoName string) error {
 	conf := lib.LoadServerConfig()
@@ -31,6 +41,5 @@ func VideoOss(file io.Reader, videoName string) error {
 	}
 
 	fmt.Println("上传文件成功！")
-
 	return nil
 }

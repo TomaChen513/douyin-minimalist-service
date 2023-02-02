@@ -59,3 +59,13 @@ func InsertTableUser(tableUser *User) bool {
 	}
 	return true
 }
+
+// GetTableUserById 根据user_id获得TableUser对象
+func GetTableUserById(id int64) (User, error) {
+	tableUser := User{}
+	if err := mysql.DB.Where("id = ?", id).First(&tableUser).Error; err != nil {
+		log.Println(err.Error())
+		return tableUser, err
+	}
+	return tableUser, nil
+}

@@ -1,6 +1,10 @@
 package service
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
 	"log"
 
 	"github.com/RaymondCode/simple-demo/model"
@@ -25,6 +29,8 @@ type UserService interface {
 }
 
 type UserServiceImpl struct {
+	// FollowService
+	// LikeService
 }
 
 // 根据id获取用户
@@ -42,6 +48,9 @@ func (usi *UserServiceImpl) GetUserById(id int64) (User, error) {
 		FollowCount:   0,
 		FollowerCount: 0,
 		IsFollow:      false,
+		FollowCount:   100,
+		FollowerCount: 100,
+		IsFollow:      true,
 	}, nil
 }
 
@@ -82,6 +91,14 @@ func GetUserInfoById(id, curId int64) User {
 		FollowerCount: followerCount,
 		IsFollow:      isFollow,
 	}
+}
+
+// EnCoder 密码加密
+func EnCoder(password string) string {
+	h := hmac.New(sha256.New, []byte(password))
+	sha := hex.EncodeToString(h.Sum(nil))
+	fmt.Println("Result: " + sha)
+	return sha
 }
 
 // InsertTableUser 将tableUser插入表内

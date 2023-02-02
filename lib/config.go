@@ -63,9 +63,8 @@ func LoadServerConfig() ServerConfig {
 		log.Fatal(2, "Fail to get section 'oss': %v", err)
 	}
 
-
 	Config := ServerConfig{
-		RunMode:     Cfg.Section("").Key("RUN_MODE").MustString("debug"),
+		RunMode: Cfg.Section("").Key("RUN_MODE").MustString("debug"),
 		// mysql
 		Type:        database.Key("TYPE").MustString(""),
 		User:        database.Key("USER").MustString(""),
@@ -74,8 +73,8 @@ func LoadServerConfig() ServerConfig {
 		DbName:      database.Key("NAME").MustString(""),
 		TablePrefix: database.Key("TABLE_PREFIX").MustString(""),
 		// redis
-		RedisHost:   redis.Key("HOST").MustString(""),
-		RedisIndex:  redis.Key("INDEX").MustString(""),
+		RedisHost:  redis.Key("HOST").MustString(""),
+		RedisIndex: redis.Key("INDEX").MustString(""),
 		// oss
 		AccessKeyID:     oss.Key("ACCESS_KEY_ID").MustString(""),
 		AccessKeySecret: oss.Key("ACCESS_KEY_SECRET").MustString(""),

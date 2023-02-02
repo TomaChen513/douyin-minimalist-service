@@ -22,6 +22,9 @@ tmp
 # Go workspace file
 go.work
 
+<<<<<<< HEAD
 .vscode
+=======
+>>>>>>> 7964bce18c35c71deb8845fb0fa92508284037c9
 .idea
 .DS_Store
