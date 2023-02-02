@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/RaymondCode/simple-demo/model"
+	"github.com/RaymondCode/simple-demo/service"
 	"github.com/gin-gonic/gin"
 	uuid "github.com/satori/go.uuid"
 )
@@ -65,46 +66,46 @@ func Publish(c *gin.Context) {
 	})
 }
 
-// // PublishList /publish/list/
-// func PublishList(c *gin.Context) {
-// 	user_Id, _ := c.GetQuery("user_id")
-// 	userId, _ := strconv.ParseInt(user_Id, 10, 64)
-// 	log.Printf("获取到用户id:%v\n", userId)
+// PublishList /publish/list/
+func PublishList(c *gin.Context) {
+	user_Id, _ := c.GetQuery("user_id")
+	userId, _ := strconv.ParseInt(user_Id, 10, 64)
+	log.Printf("获取到用户id:%v\n", userId)
 
-// 	curId, _ := strconv.ParseInt(c.GetString("userId"), 10, 64)
-// 	log.Printf("获取到当前用户id:%v\n", curId)
+	curId, _ := strconv.ParseInt(c.GetString("userId"), 10, 64)
+	log.Printf("获取到当前用户id:%v\n", curId)
 
-// 	videoService := GetVideo()
-// 	list, err := videoService.List(userId, curId)
-// 	if err != nil {
-// 		log.Printf("调用videoService.List(%v)出现错误：%v\n", userId, err)
-// 		c.JSON(http.StatusOK, VideoListResponse{
-// 			Response: Response{StatusCode: 1, StatusMsg: "获取视频列表失败"},
-// 		})
-// 		return
-// 	}
-// 	log.Printf("调用videoService.List(%v)成功", userId)
-// 	c.JSON(http.StatusOK, VideoListResponse{
-// 		Response:  Response{StatusCode: 0},
-// 		VideoList: list,
-// 	})
-// }
+	videoService := GetVideo()
+	list, err := videoService.List(userId, curId)
+	if err != nil {
+		log.Printf("调用videoService.List(%v)出现错误：%v\n", userId, err)
+		c.JSON(http.StatusOK, VideoListResponse{
+			Response: Response{StatusCode: 1, StatusMsg: "获取视频列表失败"},
+		})
+		return
+	}
+	log.Printf("调用videoService.List(%v)成功", userId)
+	c.JSON(http.StatusOK, VideoListResponse{
+		Response:  Response{StatusCode: 0},
+		VideoList: list,
+	})
+}
 
-// // GetVideo 拼装videoService
-// func GetVideo() service.VideoServiceImpl {
-// 	var userService service.UserServiceImpl
-// 	// var followService service.FollowServiceImp
-// 	var videoService service.VideoServiceImpl
-// 	// var likeService service.LikeServiceImpl
-// 	// var commentService service.CommentServiceImpl
+// GetVideo 拼装videoService
+func GetVideo() service.VideoServiceImpl {
+	var userService service.UserServiceImpl
+	// var followService service.FollowServiceImp
+	var videoService service.VideoServiceImpl
+	// var likeService service.LikeServiceImpl
+	// var commentService service.CommentServiceImpl
 
-// 	// userService.FollowService = &followService
-// 	// userService.LikeService = &likeService
-// 	// followService.UserService = &userService
-// 	// likeService.VideoService = &videoService
-// 	// commentService.UserService = &userService
-// 	// videoService.CommentService = &commentService
-// 	// videoService.LikeService = &likeService
-// 	videoService.UserService = &userService
-// 	return videoService
-// }
+	// userService.FollowService = &followService
+	// userService.LikeService = &likeService
+	// followService.UserService = &userService
+	// likeService.VideoService = &videoService
+	// commentService.UserService = &userService
+	// videoService.CommentService = &commentService
+	// videoService.LikeService = &likeService
+	videoService.UserService = &userService
+	return videoService
+}

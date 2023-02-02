@@ -33,6 +33,7 @@ func GetVideosById(videoId []int64) ([]Video, error) {
 	return videos, nil
 }
 
+// 把视频上传到oss
 func VideoOss(file io.Reader, videoName string) error {
 	conf := lib.LoadServerConfig()
 	// 创建OSSClient实例。
@@ -57,4 +58,19 @@ func VideoOss(file io.Reader, videoName string) error {
 
 	fmt.Println("上传文件成功！")
 	return nil
+}
+
+// GetVideosByAuthorId
+// 根据作者的id来查询对应数据库数据，并TableVideo返回切片
+func GetVideosByAuthorId(authorId int64) ([]Video, error) {
+	//建立结果集接收
+	var data []Video
+	//初始化db
+	//Init()
+	result := mysql.DB.Where(&Video{AuthorId: authorId}).Find(&data)
+	//如果出现问题，返回对应到空，并且返回error
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return data, nil
 }
