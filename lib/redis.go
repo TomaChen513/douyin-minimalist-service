@@ -18,7 +18,7 @@ func init() {
 		Wait:        true,              // 当连接数已满，是否要阻塞等待获取连接。false表示不等待，直接返回错误。
 		IdleTimeout: 200 * time.Second, //最大的空闲连接等待时间，超过此时间后，空闲连接将被关闭
 		Dial: func() (redis.Conn, error) { // 创建链接
-			c, err := redis.Dial("tcp", config.RedisHost)
+			c, err := redis.Dial("tcp", config.RedisHost,redis.DialPassword("wintercamp"))
 			if err != nil {
 				return nil, err
 			}
