@@ -13,16 +13,6 @@ import (
 
 // Publish /publish/action/
 func Publish(c *gin.Context) {
-	// // 鉴权token
-	// user_token := c.Query("token")
-	// _, flag := service.ParseToken(user_token)
-	// if !flag {
-	// 	c.JSON(http.StatusUnauthorized, Response{
-	// 		StatusCode: -1,
-	// 		StatusMsg:  "Token Error",
-	// 	})
-	// 	return
-	// }
 
 	data, err := c.FormFile("data")
 	if err != nil {
@@ -49,6 +39,9 @@ func Publish(c *gin.Context) {
 	videoName := uuid.NewV4().String()
 	log.Printf("生成视频名称%v", videoName)
 
+	//封面图片名称（暂时）
+	imageName := videoName
+
 	err = model.VideoOss(file, videoName)
 	if err != nil {
 		log.Printf("方法videoService.Publish(data, userId) 失败：%v", err)
@@ -60,6 +53,9 @@ func Publish(c *gin.Context) {
 	}
 	log.Printf("方法videoService.Publish(data, userId) 成功")
 
+	//组装并持久化
+	err = model.Save(videoName, imageName, userId, title)
+
 	c.JSON(http.StatusOK, Response{
 		StatusCode: 0,
 		StatusMsg:  "uploaded successfully",
@@ -69,10 +65,10 @@ func Publish(c *gin.Context) {
 // PublishList /publish/list/
 func PublishList(c *gin.Context) {
 	user_Id, _ := c.GetQuery("user_id")
-	userId, _ := strconv.ParseInt(user_Id, 10, 64)
+	userId, _ := strconv.ParseInt(user_Id, 10, 64) //被查询目标的id
 	log.Printf("获取到用户id:%v\n", userId)
 
-	curId, _ := strconv.ParseInt(c.GetString("userId"), 10, 64)
+	curId, _ := strconv.ParseInt(c.GetString("userId"), 10, 64) //现在登录账号的人的id
 	log.Printf("获取到当前用户id:%v\n", curId)
 
 	videoService := GetVideo()
@@ -94,18 +90,19 @@ func PublishList(c *gin.Context) {
 // GetVideo 拼装videoService
 func GetVideo() service.VideoServiceImpl {
 	var userService service.UserServiceImpl
-	// var followService service.FollowServiceImp
+	var followService service.FollowServiceImp
 	var videoService service.VideoServiceImpl
-	// var likeService service.LikeServiceImpl
-	// var commentService service.CommentServiceImpl
+	var likeService service.FavorServiceImpl
+	var commentService service.CommentServiceImpl
 
-	// userService.FollowService = &followService
-	// userService.LikeService = &likeService
-	// followService.UserService = &userService
-	// likeService.VideoService = &videoService
-	// commentService.UserService = &userService
-	// videoService.CommentService = &commentService
-	// videoService.LikeService = &likeService
+	userService.FollowService = &followService
+	userService.FavorService = &likeService
+	followService.UserService = &userService
+	likeService.VideoService = &videoService
+	commentService.UserService = &userService
+	videoService.CommentService = &commentService
+	videoService.FavorService = &likeService
 	videoService.UserService = &userService
+
 	return videoService
 }

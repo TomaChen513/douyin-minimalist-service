@@ -16,6 +16,7 @@ type Video struct {
 	AuthorId    int64  `gorm:"type:int" json:"author_id"`
 	PlayUrl     string `gorm:"type:varchar(255)" json:"play_url,omitempty"`
 	CoverUrl    string `gorm:"type:varchar(255)" json:"cover_url,omitempty"`
+	Title       string `json:"title"` //视频名
 	PublishTime time.Time
 }
 
@@ -73,4 +74,19 @@ func GetVideosByAuthorId(authorId int64) ([]Video, error) {
 		return nil, result.Error
 	}
 	return data, nil
+}
+
+// Save 保存视频记录
+func Save(videoName string, imageName string, authorId int64, title string) error {
+	var video Video
+	video.PublishTime = time.Now()
+	video.PlayUrl = videoName + ".mp4"
+	video.CoverUrl = imageName + ".jpg"
+	video.AuthorId = authorId
+	video.Title = title
+	result := mysql.DB.Save(&video)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
 }

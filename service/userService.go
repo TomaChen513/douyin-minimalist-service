@@ -25,6 +25,8 @@ type UserService interface {
 }
 
 type UserServiceImpl struct {
+	FollowService
+	FavorService
 }
 
 // 根据id获取用户
