@@ -23,5 +23,5 @@ func main() {
 		log.Fatal("服务器启动失败...")
 	}
 	//test push
-	//test push2.2_16.30
+
 }
