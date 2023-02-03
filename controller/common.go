@@ -16,3 +16,8 @@ type VideoListResponse_publish struct {
 	Response
 	VideoList []service.Video `json:"video_list"`
 }
+
+type MessageListResponse struct {
+	Response
+	MessageList []service.Message `json:"message_list"`
+}
