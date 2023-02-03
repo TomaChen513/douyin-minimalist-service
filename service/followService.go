@@ -11,7 +11,7 @@ type FollowService interface {
 }
 
 type FollowServiceImp struct {
-	UserServiceImpl
+	UserService
 }
 
 // 关注/取消关注操作

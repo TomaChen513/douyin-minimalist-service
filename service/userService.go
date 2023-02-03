@@ -22,6 +22,14 @@ type UserService interface {
 	ValidPassword(id int64, password string) bool
 	// 根据姓名获取用户
 	GetUserByName(userName string) (User, error)
+	// 根据id获得用户详细信息, curId表示当前登录的Id
+	GetUserInfoById(id, curId int64) (User, bool)
+	// 根据ids获取users, curId表示当前用户id
+	GetUsersByids(ids []int64, curId int64) ([]User, bool)
+	// InsertTableUser 将tableUser插入表内
+	InsertTableUser(User *model.User) bool
+	// // GetUserByIdWithCurId 已登录(curID)情况下,根据user_id获得User对象
+	// GetUserByIdWithCurId(id int64, curId int64) (User, error)
 }
 
 type UserServiceImpl struct {

@@ -9,6 +9,9 @@ import (
 
 var Cfg *ini.File
 
+// VideoCount 每次获取视频流的数量
+const VideoCount = 5
+
 // 服务端配置数据结构
 type ServerConfig struct {
 	RunMode      string

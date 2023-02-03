@@ -8,8 +8,10 @@ import (
 
 type CommentService interface {
 	DeleteComment(commentId int64) bool
-	InsertComment(userId,videoId int64,content string)(Comment,error)
-	GetCommentListDecByTime(videoId int64) ([]Comment,error)
+	InsertComment(userId, videoId int64, content string) (Comment, error)
+	GetCommentListDecByTime(videoId int64) ([]Comment, error)
+	// // 1.根据videoId获取视频评论数量的接口
+	// CountFromVideoId(id int64) (int64, error)
 }
 
 type Comment struct {
@@ -20,41 +22,40 @@ type Comment struct {
 }
 
 type CommentServiceImpl struct {
-	UserServiceImpl
+	UserService
 }
 
 // 根据主键删除评论
-func (csi *CommentServiceImpl)DeleteComment(commentId int64) bool{
+func (csi *CommentServiceImpl) DeleteComment(commentId int64) bool {
 	return model.DeleteComment(commentId)
 }
 
-
 // 插入新评论
-func (csi *CommentServiceImpl)InsertComment(userId,videoId int64,content string)(Comment,error){
-	user,_:=csi.GetUserById(userId)
-	createTime:=time.Now()
-	tableComment:=model.Comment{UserId: userId,VideoId: videoId,CommentText: content,CreateDate: createTime}
-	if !model.InsertComment(tableComment){
-		return Comment{},nil
+func (csi *CommentServiceImpl) InsertComment(userId, videoId int64, content string) (Comment, error) {
+	user, _ := csi.GetUserById(userId)
+	createTime := time.Now()
+	tableComment := model.Comment{UserId: userId, VideoId: videoId, CommentText: content, CreateDate: createTime}
+	if !model.InsertComment(tableComment) {
+		return Comment{}, nil
 	}
-	return Comment{User: user,Content: content,CreateDate: createTime.UTC().String()},nil
+	return Comment{User: user, Content: content, CreateDate: createTime.UTC().String()}, nil
 }
 
 // 按时间倒序获得视频评论
-func (csi *CommentServiceImpl)GetCommentListDecByTime(videoId int64)([]Comment,error){
-	tableComments,err:=model.GetCommentListDecByTime(videoId)
-	commentList:=make([]Comment,len(tableComments))
-	if err!=nil {
-		return commentList,nil
+func (csi *CommentServiceImpl) GetCommentListDecByTime(videoId int64) ([]Comment, error) {
+	tableComments, err := model.GetCommentListDecByTime(videoId)
+	commentList := make([]Comment, len(tableComments))
+	if err != nil {
+		return commentList, nil
 	}
 	for i := 0; i < len(tableComments); i++ {
-		user,_:=csi.GetUserById(tableComments[i].UserId)
-		commentList[i]=Comment{
-			Id: tableComments[i].Id,
-			User: user,
-			Content: tableComments[i].CommentText,
+		user, _ := csi.GetUserById(tableComments[i].UserId)
+		commentList[i] = Comment{
+			Id:         tableComments[i].Id,
+			User:       user,
+			Content:    tableComments[i].CommentText,
 			CreateDate: tableComments[i].CreateDate.String(),
 		}
 	}
-	return commentList,nil
+	return commentList, nil
 }

@@ -7,8 +7,12 @@ type Response struct {
 	StatusMsg  string `json:"status_msg,omitempty"`
 }
 
-
 type VideoListResponse struct {
 	Response
 	VideoList []service.Favor `json:"video_list"`
+}
+
+type VideoListResponse_publish struct {
+	Response
+	VideoList []service.Video `json:"video_list"`
 }

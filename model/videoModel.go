@@ -90,3 +90,41 @@ func Save(videoName string, imageName string, authorId int64, title string) erro
 	}
 	return nil
 }
+
+// GetVideosByLastTime
+// 依据一个时间，来获取这个时间之前的一些视频
+func GetVideosByLastTime(lastTime time.Time) ([]Video, error) {
+	videos := make([]Video, lib.VideoCount)
+	result := mysql.DB.Where("publish_time<?", lastTime).Order("publish_time desc").Limit(lib.VideoCount).Find(&videos)
+	if result.Error != nil {
+		return videos, result.Error
+	}
+	return videos, nil
+}
+
+// GetVideoIdsByAuthorId
+// 通过作者id来查询发布的视频id切片集合
+func GetVideoIdsByAuthorId(authorId int64) ([]int64, error) {
+	var id []int64
+	//通过pluck来获得单独的切片
+	result := mysql.DB.Model(&Video{}).Where("author_id", authorId).Pluck("id", &id)
+	//如果出现问题，返回对应到空，并且返回error
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return id, nil
+}
+
+// GetVideoByVideoId
+// 依据VideoId来获得视频信息
+func GetVideoByVideoId(videoId int64) (Video, error) {
+	var tableVideo Video
+	tableVideo.Id = videoId
+	//Init()
+	result := mysql.DB.First(&tableVideo)
+	if result.Error != nil {
+		return tableVideo, result.Error
+	}
+	return tableVideo, nil
+
+}

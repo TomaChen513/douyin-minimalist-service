@@ -2,7 +2,7 @@ package service
 
 import (
 	// "TikTok/dao"
-	"mime/multipart"
+
 	"time"
 
 	"github.com/RaymondCode/simple-demo/model"
@@ -28,7 +28,7 @@ type VideoService interface {
 	// Publish
 	// 将传入的视频流保存在文件服务器中，并存储在mysql表中
 	// 5.23 加入title
-	Publish(data *multipart.FileHeader, userId int64, title string) error
+	// Publish(data *multipart.FileHeader, userId int64, title string) error
 
 	// List
 	// 通过userId来查询对应用户发布的视频，并返回对应的视频切片数组
@@ -37,7 +37,4 @@ type VideoService interface {
 	// GetVideoIdList
 	// 通过一个作者id，返回该用户发布的视频id切片数组
 	GetVideoIdList(userId int64) ([]int64, error)
-
-	// GetUserByIdWithCurId 已登录(curID)情况下,根据user_id获得User对象
-	GetUserByIdWithCurId(id int64, curId int64) (User, error)
 }
