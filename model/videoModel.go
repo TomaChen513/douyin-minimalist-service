@@ -51,7 +51,7 @@ func VideoOss(file io.Reader, videoName string) error {
 	}
 
 	// 上传文件。
-	err = bucket.PutObject(videoName, file)
+	err = bucket.PutObject(videoName+".mp4", file)
 	if err != nil {
 		fmt.Println("文件上传Error:", err)
 		return err
@@ -80,8 +80,8 @@ func GetVideosByAuthorId(authorId int64) ([]Video, error) {
 func Save(videoName string, imageName string, authorId int64, title string) error {
 	var video Video
 	video.PublishTime = time.Now()
-	video.PlayUrl = videoName
-	video.CoverUrl = imageName
+	video.PlayUrl = "https://douyinmiaomiao.oss-cn-hangzhou.aliyuncs.com/" + videoName + ".mp4"
+	video.CoverUrl = "https://douyinmiaomiao.oss-cn-hangzhou.aliyuncs.com/" + imageName + ".jpg"
 	video.AuthorId = authorId
 	video.Title = title
 	result := mysql.DB.Save(&video)
