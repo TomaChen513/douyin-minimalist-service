@@ -15,14 +15,7 @@ require (
 )
 
 require (
-	github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af // indirect
-	github.com/opentracing/opentracing-go v1.2.1-0.20220228012449-10b1cf09e00b // indirect
-	gopkg.in/ini.v1 v1.66.2 // indirect
-)
-
-require (
 	github.com/ajg/form v1.5.1 // indirect
-	github.com/aliyun/alibaba-cloud-sdk-go v1.62.153
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fatih/structs v1.1.0 // indirect

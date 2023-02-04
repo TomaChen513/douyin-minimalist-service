@@ -80,7 +80,6 @@ func Feed(c *gin.Context) {
 	} else {
 		lastTime = time.Now()
 	}
-	// lastTime = time.Now()
 	log.Printf("获取到时间戳%v", lastTime)
 	userId, _ := strconv.ParseInt(c.GetString("userId"), 10, 64)
 	log.Printf("获取到用户id:%v\n", userId)
