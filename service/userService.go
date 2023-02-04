@@ -28,8 +28,8 @@ type UserService interface {
 	GetUsersByids(ids []int64, curId int64) ([]User, bool)
 	// InsertTableUser 将tableUser插入表内
 	InsertTableUser(User *model.User) bool
-	// // GetUserByIdWithCurId 已登录(curID)情况下,根据user_id获得User对象
-	// GetUserByIdWithCurId(id int64, curId int64) (User, error)
+	// GetUserByIdWithCurId 已登录(curID)情况下,根据user_id获得User对象
+	GetUserByIdWithCurId(id int64, curId int64) (User, error)
 }
 
 type UserServiceImpl struct {
@@ -138,4 +138,43 @@ func (usi *UserServiceImpl) InsertTableUser(User *model.User) bool {
 		return false
 	}
 	return true
+}
+
+// GetUserByIdWithCurId 已登录(curID)情况下,根据user_id获得User对象
+func (usi *UserServiceImpl) GetUserByIdWithCurId(id int64, curId int64) (User, error) {
+	user := User{
+		Id:            0,
+		Name:          "",
+		FollowCount:   0,
+		FollowerCount: 0,
+		IsFollow:      false,
+	}
+	tableUser, err := model.GetUserById(id)
+	if err != nil {
+		log.Println("Err:", err.Error())
+		log.Println("User Not Found")
+		return user, err
+	}
+	log.Println("Query User Success")
+	followCount, _ := usi.GetFollowingCnt(id)
+	// if err != nil {
+	// 	log.Println("Err:", err.Error())
+	// }
+	followerCount := usi.GetFollowerCnt(id)
+	// if err != nil {
+	// 	log.Println("Err:", err.Error())
+	// }
+	isfollow := usi.IsFollowing(curId, id)
+	// if err != nil {
+	// 	log.Println("Err:", err.Error())
+	// }
+
+	user = User{
+		Id:            id,
+		Name:          tableUser.Name,
+		FollowCount:   followCount,
+		FollowerCount: followerCount,
+		IsFollow:      isfollow,
+	}
+	return user, nil
 }

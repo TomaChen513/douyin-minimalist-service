@@ -61,7 +61,7 @@ func Publish(c *gin.Context) {
 	log.Printf("方法videoService.Publish(data, userId) 成功")
 
 	//组装并持久化
-	err = model.Save(videoName, imageName, userId, title)
+	_ = model.Save(videoName, imageName, userId, title)
 
 	c.JSON(http.StatusOK, Response{
 		StatusCode: 0,
@@ -104,7 +104,7 @@ func Feed(c *gin.Context) {
 func PublishList(c *gin.Context) {
 	user_Id, _ := c.GetQuery("user_id")
 	userId, _ := strconv.ParseInt(user_Id, 10, 64) //被查询目标的id
-	log.Printf("获取到用户id:%v\n", userId)
+	log.Printf("获取到待查询目标用户id:%v\n", userId)
 
 	curId, _ := strconv.ParseInt(c.GetString("userId"), 10, 64) //现在登录账号的人的id
 	log.Printf("获取到当前用户id:%v\n", curId)
