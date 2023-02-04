@@ -29,3 +29,12 @@ func InsertMessage(uId,tuId int64,content string,createTime time.Time)bool{
 	}
 	return true
 }
+
+func SelectMessageByUserId(uId,tuId int64)  ([]Message,error){
+	var messages []Message
+	if err:=mysql.DB.Where("user_id=?",uId).Where("to_user_id=?",tuId).Find(&messages).Error;err!=nil {
+		log.Println(err.Error())
+		return messages,err
+	}
+	return messages,nil
+}
