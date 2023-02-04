@@ -21,7 +21,6 @@ type FavorService interface {
 	// IsFavourite(videoId int64, userId int64) (bool, error)
 	// //FavouriteCount 根据当前视频id获取当前视频点赞数量。
 	// FavouriteCount(videoId int64) (int64, error)
-
 }
 
 type FavorServiceImpl struct {
