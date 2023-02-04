@@ -9,7 +9,9 @@ import (
 
 type Message struct {
 	Id         int64  `json:"id,omitempty"`
-	Content    string `json:"content,omitempty"`
+	ToUserId int64 `json:"to_user_id"`
+	UserId  int64 `json:"from_user_id"`
+	Content    string `json:"content"`
 	CreateTime string `json:"create_time"`
 }
 
@@ -41,8 +43,22 @@ func(msi *MessageServiceImpl)GetMessage(uId,tuId int64) ([]Message,error){
 		serviceMessages = append(serviceMessages, Message{
 			Id: m.Id,
 			Content: m.Content,
+			UserId: m.UserId,
+			ToUserId: m.ToUserId,
 			CreateTime: m.CreateTime.Format("2006-01-02 15:04:05"),
 		})
 	}
+
+	messages,_=model.SelectMessageByUserId(tuId,uId)
+	for _,m:=range messages{
+		serviceMessages = append(serviceMessages, Message{
+			Id: m.Id,
+			Content: m.Content,
+			UserId: m.UserId,
+			ToUserId: m.ToUserId,
+			CreateTime: m.CreateTime.Format("2006-01-02 15:04:05"),
+		})
+	}
+
 	return serviceMessages,nil
 }

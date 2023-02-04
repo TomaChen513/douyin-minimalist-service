@@ -53,3 +53,13 @@ func SelectVideosByUserId(userId int64) ([]int64,error){
 	}
 	return res,nil
 }
+
+// 根据视频id寻找点赞记录
+func SelectLikesByVideoId(videoId int64) ([]Like,error){
+	var likes []Like
+	if err:=mysql.DB.Where("video_id=?",videoId).Find(&likes).Error;err!=nil {
+		log.Println(err.Error())
+		return []Like{},err
+	}
+	return likes,nil
+}

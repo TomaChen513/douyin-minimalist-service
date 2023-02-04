@@ -1,6 +1,8 @@
 package service
 
-import "github.com/RaymondCode/simple-demo/model"
+import (
+	"github.com/RaymondCode/simple-demo/model"
+)
 
 type Favor struct {
 	Id            int64  `json:"id,omitempty"`
@@ -18,8 +20,8 @@ type FavorService interface {
 	FavoriteAction(userId, videoId int64, actionType string) bool
 	// //IsFavorite 根据当前视频id判断是否点赞了该视频。
 	// IsFavourite(videoId int64, userId int64) (bool, error)
-	// //FavouriteCount 根据当前视频id获取当前视频点赞数量。
-	// FavouriteCount(videoId int64) (int64, error)
+	//FavouriteCount 根据当前视频id获取当前视频点赞数量。
+	FavouriteCount(videoId int64) (int64, error)
 	// // GetUserByIdWithCurId 已登录(curID)情况下,根据user_id获得User对象
 	// GetUserByIdWithCurId(id int64, curId int64) (User, error)
 }
@@ -61,4 +63,12 @@ func (fvsi *FavorServiceImpl) GetFavouriteList(userId int64) ([]Favor, error) {
 		favors[i].Title = "testTitle"
 	}
 	return favors, nil
+}
+
+func (fvsi *FavorServiceImpl) FavoriteCount(videoId int64) (int64,error){
+	videos,err:=model.SelectLikesByVideoId(videoId)
+	if err!=nil {
+		return -1,err
+	}
+	return len(videos),nil
 }
