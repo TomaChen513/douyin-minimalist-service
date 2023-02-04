@@ -16,12 +16,12 @@ type Favor struct {
 type FavorService interface {
 	// 点赞操作
 	FavoriteAction(userId, videoId int64, actionType string) bool
+	GetFavouriteList(userId int64) ([]Favor, error)
 	// //IsFavorite 根据当前视频id判断是否点赞了该视频。
 	// IsFavourite(videoId int64, userId int64) (bool, error)
 	// //FavouriteCount 根据当前视频id获取当前视频点赞数量。
 	// FavouriteCount(videoId int64) (int64, error)
-	// // GetUserByIdWithCurId 已登录(curID)情况下,根据user_id获得User对象
-	// GetUserByIdWithCurId(id int64, curId int64) (User, error)
+
 }
 
 type FavorServiceImpl struct {

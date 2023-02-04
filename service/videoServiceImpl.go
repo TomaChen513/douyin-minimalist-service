@@ -44,10 +44,10 @@ func (videoService *VideoServiceImpl) List(userId int64, curId int64) ([]Video, 
 	//依据用户id查询所有的视频，获取视频列表
 	data, err := model.GetVideosByAuthorId(userId)
 	if err != nil {
-		log.Printf("方法dao.GetVideosByAuthorId(%v)失败:%v", userId, err)
+		log.Printf("方法GetVideosByAuthorId(%v)失败:%v", userId, err)
 		return nil, err
 	}
-	log.Printf("方法dao.GetVideosByAuthorId(%v)成功:%v", userId, data)
+	log.Printf("方法GetVideosByAuthorId(%v)成功:%v", userId, data)
 	//提前定义好切片长度
 	result := make([]Video, 0, len(data))
 	//调用拷贝方法，将数据进行转换
@@ -76,19 +76,19 @@ func (videoService *VideoServiceImpl) creatVideo(video *Video, data *model.Video
 	//建立协程组，当这一组的携程全部完成后，才会结束本方法
 	// var wg sync.WaitGroup
 	// wg.Add(4)
-	// var err error
-	// video.Video = *data
-	// //插入Author，这里需要将视频的发布者和当前登录的用户传入，才能正确获得isFollow，
-	// //如果出现错误，不能直接返回失败，将默认值返回，保证稳定
-	// go func() {
-	// 	video.Author, err = videoService.GetUserByIdWithCurId(data.AuthorId, userId)
-	// 	if err != nil {
-	// 		log.Printf("方法videoService.GetUserByIdWithCurId(data.AuthorId, userId) 失败：%v", err)
-	// 	} else {
-	// 		log.Printf("方法videoService.GetUserByIdWithCurId(data.AuthorId, userId) 成功")
-	// 	}
-	// 	wg.Done()
-	// }()
+	var err error
+	video.Video = *data
+	//插入Author，这里需要将视频的发布者和当前登录的用户传入，才能正确获得isFollow，
+	//如果出现错误，不能直接返回失败，将默认值返回，保证稳定
+	go func() {
+		video.Author, err = videoService.GetUserByIdWithCurId(data.AuthorId, userId)
+		if err != nil {
+			log.Printf("方法videoService.GetUserByIdWithCurId(data.AuthorId, userId) 失败：%v", err)
+		} else {
+			log.Printf("方法videoService.GetUserByIdWithCurId(data.AuthorId, userId) 成功")
+		}
+		// wg.Done()
+	}()
 
 	// //插入点赞数量，同上所示，不将nil直接向上返回，数据没有就算了，给一个默认就行了
 	// go func() {
