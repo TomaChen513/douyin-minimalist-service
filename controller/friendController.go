@@ -44,7 +44,7 @@ func FriendsList(c *gin.Context) {
 		FriendList: []FriendUser{
 			FriendUser{Id: 4,Name: "测试用户",FollowCount: 10,FollowerCount: 10,IsFollow: true,
 		Message: "test",MsgType: 0,},
-			FriendUser{Id: 5,Name: "测试用户2",FollowCount: 10,FollowerCount: 10,IsFollow: true,
+			FriendUser{Id: 1,Name: "测试用户2",FollowCount: 10,FollowerCount: 10,IsFollow: true,
 		Message: "tesst2",MsgType: 1,},
 		},
 	})

@@ -51,7 +51,7 @@ func MessageChat(c *gin.Context) {
 	messages, err := msi.GetMessage(uId, tuId)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, Response{StatusCode: 1, StatusMsg: "获取消息失败！"})
+		c.JSON(http.StatusInternalServerError, Response{StatusCode: 1, StatusMsg: "获取消息失败！!"})
 		return
 	}
 
