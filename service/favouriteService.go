@@ -71,5 +71,6 @@ func (fvsi *FavorServiceImpl) FavoriteCount(videoId int64) (int64,error){
 	if err!=nil {
 		return -1,err
 	}
-	return len(videos),nil
+	length:=len(videos)
+	return int64(length),nil
 }
