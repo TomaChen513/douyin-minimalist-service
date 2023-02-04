@@ -66,10 +66,10 @@ func (fvsi *FavorServiceImpl) GetFavouriteList(userId int64) ([]Favor, error) {
 	return favors, nil
 }
 
-func (fvsi *FavorServiceImpl) FavoriteCount(videoId int64) (int64, error) {
+func (fvsi *FavorServiceImpl) FavouriteCount(videoId int64) (int64, error) {
 	videos, err := model.SelectLikesByVideoId(videoId)
 	if err != nil {
 		return -1, err
 	}
-	return len(videos), nil
+	return int64(len(videos)), nil
 }
