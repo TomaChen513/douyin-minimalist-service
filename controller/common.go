@@ -9,7 +9,7 @@ type Response struct {
 
 type VideoListResponse struct {
 	Response
-	VideoList []service.Favor `json:"video_list"`
+	VideoList []service.Video `json:"video_list"`
 }
 
 type VideoListResponse_publish struct {

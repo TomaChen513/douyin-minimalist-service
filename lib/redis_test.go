@@ -1,17 +1,25 @@
 package lib
 
 import (
-	"fmt"
+	"context"
 	"testing"
+	"time"
+
+	"github.com/go-redis/redis/v8"
 )
 
 func TestSetKey(t *testing.T) {
-	SetKey("1223","1223",10)
-	SetKey("1456","145",10)
+	var Ctx = context.Background()
 
-}
+	RdbLikeUserId = redis.NewClient(&redis.Options{
+		Addr:     "121.5.231.228:6379",
+		Password: "wintercamp",
+		DB:       0, //  选择将点赞视频id信息存入 DB0.
+	})
 
-func TestGetKey(t *testing.T) {
-	fmt.Println(GetKey("1223"))
-	fmt.Println(GetKey("1456"))
+	RdbLikeUserId.Set(Ctx,"toma","cxy1",10*time.Second)
+
+	RdbLikeUserId.SAdd(Ctx,"xyz","123","456","789")
+
+	
 }

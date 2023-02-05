@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -11,7 +12,6 @@ import (
 // 有重复点赞的bug， 在点赞前先查询数据库中是否已经存在记录
 // 点赞操作  POST /douyin/favorite/action/
 func FavoriteAction(c *gin.Context) {
-	// 使用mysql进行操作，性能极差，建议优化
 	userId := c.GetString("userId")
 	videoId := c.Query("video_id")
 	actionType := c.Query("action_type")
@@ -22,33 +22,38 @@ func FavoriteAction(c *gin.Context) {
 
 	// 执行点赞或者取消点赞操作
 	if !fvsi.FavoriteAction(uId, vId, actionType) {
-		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "点赞操作数据库操作失败！"})
+		log.Printf("service.FavoriteAction(uId, vId, actionType) 失败")
+		c.JSON(http.StatusOK, Response{StatusCode: 1, StatusMsg: "点赞操作失败！"})
 		return
 	}
-	c.JSON(http.StatusOK, Response{StatusCode: 0})
+	log.Printf("service.FavoriteAction(uId, vId, actionType) 成功")
+	c.JSON(http.StatusOK, Response{StatusCode: 0, StatusMsg: "点赞操作成功！"})
 }
 
 // 不知道为啥一直返回空数组， 可能我测试有问题
 // 喜欢列表 GET /douyin/favorite/list/
 func FavoriteList(c *gin.Context) {
+	// user_id：待查询的用户id，token只是为了验证是否有权限
 	userId := c.Query("user_id")
 	uId, _ := strconv.ParseInt(userId, 10, 64)
 
 	fvsi := service.FavorServiceImpl{}
 
+	// 获得喜欢列表
 	favorVideoList, err := fvsi.GetFavouriteList(uId)
 
 	if err != nil {
 		c.JSON(http.StatusOK, UserResponse{
-			Response: Response{StatusCode: 1, StatusMsg: "数据库处理错误！"},
+			Response: Response{StatusCode: 1,
+				StatusMsg: "GetFavouriteList(userId int64) ([]Favor, error)调用失败"},
 		})
 		return
-	} else {
-		c.JSON(http.StatusOK, VideoListResponse{
-			Response: Response{
-				StatusCode: 0,
-			},
-			VideoList: favorVideoList,
-		})
 	}
+
+	c.JSON(http.StatusOK, VideoListResponse{
+		Response: Response{
+			StatusCode: 0,
+			StatusMsg:  "GetFavouriteList(userId int64) ([]Favor, error)调用成功"},
+		VideoList: favorVideoList,
+	})
 }

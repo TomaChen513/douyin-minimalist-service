@@ -43,7 +43,7 @@ func LoadServerConfig() ServerConfig {
 
 	var err error
 
-	Cfg, err = ini.Load("conf/app.ini")
+	Cfg, err = ini.Load("./conf/app.ini")
 	if err != nil {
 		log.Fatal(2, "Fail to parse 'conf/app.ini': %v", err)
 	}
@@ -78,6 +78,7 @@ func LoadServerConfig() ServerConfig {
 		// redis
 		RedisHost:  redis.Key("HOST").MustString(""),
 		RedisIndex: redis.Key("INDEX").MustString(""),
+
 		// oss
 		AccessKeyID:     oss.Key("ACCESS_KEY_ID").MustString(""),
 		AccessKeySecret: oss.Key("ACCESS_KEY_SECRET").MustString(""),
