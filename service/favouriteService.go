@@ -40,14 +40,15 @@ type FavorServiceImpl struct {
 	VideoService
 }
 
+// 重复点赞问题
 // 点赞操作
 func (fvsi *FavorServiceImpl) FavoriteAction(userId, videoId int64, actionType string) bool {
 	if actionType == "1" {
 		// 执行点赞
-		return model.InsertFavourite(model.Like{UserId: userId, VideoId: videoId})
+		return fvsi.likeAction(userId, videoId)
 	} else if actionType == "2" {
 		// 执行取消点赞
-		return model.DeleteFavourite(model.Like{UserId: userId, VideoId: videoId})
+		return fvsi.unLikeAction(userId, videoId)
 	}
 	return false
 }
@@ -130,7 +131,7 @@ func (fvsi *FavorServiceImpl) GetFavouriteList(userId int64) ([]Video, error) {
 		}
 	}
 
-	videoLength:=len(favouriteVideosId)
+	videoLength := len(favouriteVideosId)
 	// 使用协程逐个获取video对象,这里采用的video id是直接从数据库获取的
 	var wg sync.WaitGroup
 	wg.Add(videoLength)
@@ -143,8 +144,18 @@ func (fvsi *FavorServiceImpl) GetFavouriteList(userId int64) ([]Video, error) {
 	wg.Wait()
 	return favoriteVideoList, nil
 }
+
 // ===============待编写测试文件====================
 
+// 点赞操作
+// 1. 对缓存进行添加操作，若无缓存  同时开协程修改视频点赞数量
+func (fvsi *FavorServiceImpl) likeAction(userId, videoId int64) bool {
+
+	return false
+}
+func (fvsi *FavorServiceImpl) unLikeAction(userId, videoId int64) bool {
+	return false
+}
 
 // ===============待编写测试文件====================
 // 根据videoId和userId从数据库获取一条video信息
@@ -156,16 +167,45 @@ func (fvsi *FavorServiceImpl) addVideoList(videoId, userId int64, videoList *[]V
 	}
 	*videoList = append(*videoList, video)
 }
+
 // ===============待编写测试文件====================
 
-
-
+// ===============待编写测试文件====================
+// 根据video id获得视频点赞数量,-1表示查询的数据有误
+// 1. 判断缓存，若无缓存，从数据库读取并存入缓存
 func (fvsi *FavorServiceImpl) FavouriteCount(videoId int64) (int64, error) {
-	videos, err := model.SelectLikesByVideoId(videoId)
+	strVideoId := strconv.FormatInt(videoId, 10)
+	// 若点赞数存在缓存中
+	if n, err := lib.RdbLikeVideoCount.Exists(lib.Ctx, strVideoId).Result(); n > 0 {
+		// 出现查询存在key，但是失败的情况
+		if err != nil {
+			log.Printf("方法:FavouriteCount RedisLikeVideoCount query key失败：%v", err)
+			return -1, err
+		}
+		strCount, err1 := lib.RdbLikeVideoCount.Get(lib.Ctx, strVideoId).Result()
+		if err1 != nil {
+			log.Printf("方法:FavouriteCount RedisLikeVideoCount key存储value有误：%v", err1)
+			return -1, err
+		}
+		count, _ := strconv.ParseInt(strCount, 10, 64)
+		return count, nil
+	}
+
+	// 若不在缓存中则直接读取数据库并设置进缓存，同时设置失效时间
+	// 数据库获取点赞量
+	count, err := model.CountLikesByVideoId(videoId)
 	if err != nil {
+		log.Printf("方法:FavouriteCount model.CountLikesByVideoId：%v", err)
 		return -1, err
 	}
-	return int64(len(videos)), nil
+
+	// 存入redis并设置一天的过期时间，这里怕有并发安全问题
+	_,err1:=lib.RdbLikeVideoCount.Set(lib.Ctx,strVideoId,count,24*time.Hour).Result()
+	if err1!=nil {
+		log.Printf("方法:FavouriteCount 存入redis出现错误:%v", err1)
+		return -1,err1
+	}
+
+	return count, nil
 }
-
-
+// ===============待编写测试文件====================
