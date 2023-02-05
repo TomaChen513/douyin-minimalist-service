@@ -9,7 +9,7 @@ import (
 var Ctx = context.Background()
 
 var RdbLikeUserId *redis.Client  //key:userId,value:VideoId 用户点赞对应视频
-var RdbLikeVideoId *redis.Client //key:VideoId,value:userId 视频对应所点赞的用户
+// var RdbLikeVideoId *redis.Client //key:VideoId,value:userId 视频对应所点赞的用户
 var RdbLikeVideoCount *redis.Client //key:videoId,value:cnt 视频对应点赞数量
 var RdbVCid *redis.Client
 var RdbCVid *redis.Client
@@ -22,11 +22,11 @@ func init() {
 		Password: "wintercamp",
 		DB:       0, //  选择将点赞视频id信息存入 DB0.
 	})
-	RdbLikeVideoId = redis.NewClient(&redis.Options{
-		Addr:     config.RedisHost,
-		Password: "wintercamp",
-		DB:       1, //  选择将点赞用户id信息存入 DB1.
-	})
+	// RdbLikeVideoId = redis.NewClient(&redis.Options{
+	// 	Addr:     config.RedisHost,
+	// 	Password: "wintercamp",
+	// 	DB:       1, //  选择将点赞用户id信息存入 DB1.
+	// })
 	RdbVCid = redis.NewClient(&redis.Options{
 		Addr:     config.RedisHost,
 		Password: "wintercamp",

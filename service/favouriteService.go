@@ -146,15 +146,193 @@ func (fvsi *FavorServiceImpl) GetFavouriteList(userId int64) ([]Video, error) {
 }
 
 // ===============待编写测试文件====================
-
 // 点赞操作
-// 1. 对缓存进行添加操作，若无缓存  同时开协程修改视频点赞数量
+// 1. 对userId和videoId缓存进行添加操作，若无对应缓存key,则添加缓存，对点赞量缓存进行自增操作
+// 2. 并将数据库操作推入消息队列
 func (fvsi *FavorServiceImpl) likeAction(userId, videoId int64) bool {
+	strUserId := strconv.FormatInt(userId, 10)
+	strVideoId := strconv.FormatInt(videoId, 10)
 
-	return false
+	// RdbLikeUserId
+	// 若存在缓存
+	if n, err := lib.RdbLikeUserId.Exists(lib.Ctx, strUserId).Result(); n > 0 {
+		if err != nil {
+			log.Printf("方法:FavouriteAction RedisLikeUserId query key失败：%v", err)
+			return false
+		}
+
+		// 将videoId加入缓存
+		if _, err1 := lib.RdbLikeUserId.SAdd(lib.Ctx, strUserId, strVideoId).Result(); err1 != nil {
+			log.Printf("方法:FavouriteAction RedisLikeUserId add value失败：%v", err1)
+			return false
+		} else {
+			// 若无错误，加入消息队列操作数据库
+			// 若数据库操作失败，缓存已经存在，不影响
+			// rabbitmq
+			model.InsertFavourite(model.Like{UserId: userId, VideoId: videoId})
+			//
+			//
+			//
+			//
+		}
+	} else {
+		if _, err := lib.RdbLikeUserId.SAdd(lib.Ctx, strUserId, -1).Result(); err != nil {
+			log.Printf("方法:FavouriteAction RedisLikeUserId add value失败")
+			lib.RdbLikeUserId.Del(lib.Ctx, strUserId)
+			return false
+		}
+		// 设置过期时间
+		_, err := lib.RdbLikeUserId.Expire(lib.Ctx, strUserId, 24*time.Hour).Result()
+		if err != nil {
+			log.Printf("方法:FavouriteAction RedisLikeUserId 设置有效期失败")
+			lib.RdbLikeUserId.Del(lib.Ctx, strUserId)
+			return false
+		}
+		// 查询数据库获得userId所有点赞视频id，存入redis
+		videoIds, err1 := model.SelectVideosByUserId(userId)
+		if err1 != nil {
+			log.Printf("方法:GetFavouriteList model.SelectVideosByUserId失败：%v", err)
+			lib.RdbLikeUserId.Del(lib.Ctx, strUserId)
+		}
+
+		// 将所有videoId存入缓存，若失败删除key，并返回，为了防止脏读
+		for _, likeVideoId := range videoIds {
+			if _, err := lib.RdbLikeUserId.SAdd(lib.Ctx, strUserId, likeVideoId).Result(); err != nil {
+				log.Printf("方法:FavouriteAction RedisLikeUserId add value失败")
+				lib.RdbLikeUserId.Del(lib.Ctx, strUserId)
+				return false
+			}
+		}
+		if _, err2 := lib.RdbLikeUserId.SAdd(lib.Ctx, strUserId, videoId).Result(); err2 != nil {
+			log.Printf("方法:FavouriteAction RedisLikeUserId add value失败：%v", err2)
+			return false
+		} else {
+			// 插入消息队列
+			//
+			model.InsertFavourite(model.Like{UserId: userId, VideoId: videoId})
+			//
+			//
+			//
+		}
+	}
+
+	// RdbLikeVideoCount 先进行自增，若自增错误则删除上文插入redis的videoId
+	// 若不存在，则先新建缓存
+	if _, err := lib.RdbLikeVideoCount.Exists(lib.Ctx, strUserId).Result(); err != nil {
+		log.Printf("方法:FavouriteAction RedisLikeVideoCount 不存在：%v", err)
+		_, err1 := fvsi.FavouriteCount(videoId)
+		// 若获取点赞出现错误则回退之前操作
+		if err1 != nil {
+			log.Printf("方法:FavouriteAction RedisLikeVideoCount 获取点赞错误：%v", err1)
+			_, err2 := lib.RdbLikeUserId.SRem(lib.Ctx, strUserId, videoId).Result()
+			if err2 != nil {
+				log.Printf("方法:FavouriteAction RedisLikeUserId 移除元素错误：%v", err1)
+				return false
+			}
+			return false
+		}
+	}
+	// 缓存值加一
+	_, err := lib.RdbLikeVideoCount.Incr(lib.Ctx, strUserId).Result()
+	if err != nil {
+		log.Printf("方法:FavouriteAction RedisLikeVideoCount 自增错误：%v", err)
+		return false
+	}
+	return true
 }
+
+// ===============待编写测试文件====================
+// 取消点赞操作
 func (fvsi *FavorServiceImpl) unLikeAction(userId, videoId int64) bool {
-	return false
+	strUserId := strconv.FormatInt(userId, 10)
+	strVideoId := strconv.FormatInt(videoId, 10)
+
+	// RdbLikeUserId
+	// 若存在缓存
+	if n, err := lib.RdbLikeUserId.Exists(lib.Ctx, strUserId).Result(); n > 0 {
+		if err != nil {
+			log.Printf("方法:FavouriteAction RedisLikeUserId query key失败：%v", err)
+			return false
+		}
+
+		// 将videoId加入缓存
+		if _, err1 := lib.RdbLikeUserId.SAdd(lib.Ctx, strUserId, strVideoId).Result(); err1 != nil {
+			log.Printf("方法:FavouriteAction RedisLikeUserId add value失败：%v", err1)
+			return false
+		} else {
+			// 若无错误，加入消息队列操作数据库
+			// 若数据库操作失败，缓存已经存在，不影响
+			// rabbitmq
+			model.DeleteFavourite(model.Like{UserId: userId, VideoId: videoId})
+			//
+			//
+			//
+			//
+		}
+	} else {
+		if _, err := lib.RdbLikeUserId.SAdd(lib.Ctx, strUserId, -1).Result(); err != nil {
+			log.Printf("方法:FavouriteAction RedisLikeUserId add value失败")
+			lib.RdbLikeUserId.Del(lib.Ctx, strUserId)
+			return false
+		}
+		// 设置过期时间
+		_, err := lib.RdbLikeUserId.Expire(lib.Ctx, strUserId, 24*time.Hour).Result()
+		if err != nil {
+			log.Printf("方法:FavouriteAction RedisLikeUserId 设置有效期失败")
+			lib.RdbLikeUserId.Del(lib.Ctx, strUserId)
+			return false
+		}
+		// 查询数据库获得userId所有点赞视频id，存入redis
+		videoIds, err1 := model.SelectVideosByUserId(userId)
+		if err1 != nil {
+			log.Printf("方法:GetFavouriteList model.SelectVideosByUserId失败：%v", err)
+			lib.RdbLikeUserId.Del(lib.Ctx, strUserId)
+		}
+
+		// 将所有videoId存入缓存，若失败删除key，并返回，为了防止脏读
+		for _, likeVideoId := range videoIds {
+			if _, err := lib.RdbLikeUserId.SAdd(lib.Ctx, strUserId, likeVideoId).Result(); err != nil {
+				log.Printf("方法:FavouriteAction RedisLikeUserId add value失败")
+				lib.RdbLikeUserId.Del(lib.Ctx, strUserId)
+				return false
+			}
+		}
+		if _, err2 := lib.RdbLikeUserId.SRem(lib.Ctx, strUserId, videoId).Result(); err2 != nil {
+			log.Printf("方法:FavouriteAction RedisLikeUserId add value失败：%v", err2)
+			return false
+		} else {
+			// 插入消息队列
+			//
+			model.DeleteFavourite(model.Like{UserId: userId, VideoId: videoId})
+			//
+			//
+			//
+		}
+	}
+
+	// RdbLikeVideoCount 先进行自增，若自增错误则删除上文插入redis的videoId
+	// 若不存在，则先新建缓存
+	if _, err := lib.RdbLikeVideoCount.Exists(lib.Ctx, strUserId).Result(); err != nil {
+		log.Printf("方法:FavouriteAction RedisLikeVideoCount 不存在：%v", err)
+		_, err1 := fvsi.FavouriteCount(videoId)
+		// 若获取点赞出现错误则回退之前操作
+		if err1 != nil {
+			log.Printf("方法:FavouriteAction RedisLikeVideoCount 获取点赞错误：%v", err1)
+			_, err2 := lib.RdbLikeUserId.SRem(lib.Ctx, strUserId, videoId).Result()
+			if err2 != nil {
+				log.Printf("方法:FavouriteAction RedisLikeUserId 移除元素错误：%v", err1)
+				return false
+			}
+			return false
+		}
+	}
+	// 缓存值减1
+	_, err := lib.RdbLikeVideoCount.Decr(lib.Ctx, strUserId).Result()
+	if err != nil {
+		log.Printf("方法:FavouriteAction RedisLikeVideoCount 自减错误：%v", err)
+		return false
+	}
+	return true
 }
 
 // ===============待编写测试文件====================
@@ -167,8 +345,6 @@ func (fvsi *FavorServiceImpl) addVideoList(videoId, userId int64, videoList *[]V
 	}
 	*videoList = append(*videoList, video)
 }
-
-// ===============待编写测试文件====================
 
 // ===============待编写测试文件====================
 // 根据video id获得视频点赞数量,-1表示查询的数据有误
@@ -200,12 +376,11 @@ func (fvsi *FavorServiceImpl) FavouriteCount(videoId int64) (int64, error) {
 	}
 
 	// 存入redis并设置一天的过期时间，这里怕有并发安全问题
-	_,err1:=lib.RdbLikeVideoCount.Set(lib.Ctx,strVideoId,count,24*time.Hour).Result()
-	if err1!=nil {
+	_, err1 := lib.RdbLikeVideoCount.Set(lib.Ctx, strVideoId, count, 24*time.Hour).Result()
+	if err1 != nil {
 		log.Printf("方法:FavouriteCount 存入redis出现错误:%v", err1)
-		return -1,err1
+		return -1, err1
 	}
 
 	return count, nil
 }
-// ===============待编写测试文件====================
