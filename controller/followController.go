@@ -33,7 +33,8 @@ func RelationAction(c *gin.Context) {
 		return
 	}
 
-	fsi := service.FollowServiceImp{}
+	fsi := service.FollowServiceImp{UserService: &service.UserServiceImpl{}}
+
 	_, err3 := fsi.GetUserById(followerId)
 
 	if err3 != nil {
@@ -79,7 +80,7 @@ func FollowList(c *gin.Context) {
 		return
 	}
 
-	fsi := service.FollowServiceImp{}
+	fsi := service.FollowServiceImp{UserService: &service.UserServiceImpl{}}
 	users, ok := fsi.GetFollowList(userId, curId)
 
 	if !ok {
@@ -102,7 +103,7 @@ func FollowList(c *gin.Context) {
 func FollowerList(c *gin.Context) {
 	cur_id, ok := c.Get("userId")
 	curId := cur_id.(int64)
-	userId, err := strconv.ParseInt(c.Query("to_user_id"), 10, 64)
+	userId, err := strconv.ParseInt(c.Query("user_id"), 10, 64)
 
 	//判断参数格式
 	if !ok || err != nil {
@@ -113,7 +114,7 @@ func FollowerList(c *gin.Context) {
 		})
 	}
 
-	fsi := service.FollowServiceImp{}
+	fsi := service.FollowServiceImp{UserService: &service.UserServiceImpl{}}
 	users, ok := fsi.GetFollowerList(userId, curId)
 
 	if !ok {
@@ -136,7 +137,7 @@ func FollowerList(c *gin.Context) {
 func FriendList(c *gin.Context) {
 	cur_id, ok := c.Get("userId")
 	curId := cur_id.(int64)
-	userId, err := strconv.ParseInt(c.Query("to_user_id"), 10, 64)
+	userId, err := strconv.ParseInt(c.Query("user_id"), 10, 64)
 
 	//判断参数格式
 	if !ok || err != nil {
@@ -147,7 +148,7 @@ func FriendList(c *gin.Context) {
 		})
 	}
 
-	fsi := service.FollowServiceImp{}
+	fsi := service.FollowServiceImp{UserService: &service.UserServiceImpl{}}
 	users, ok := fsi.GetFriendList(userId, curId)
 
 	if !ok {

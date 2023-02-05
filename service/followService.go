@@ -59,6 +59,7 @@ func (fsi *FollowServiceImp) GetFriendList(userId, curId int64) ([]User, bool) {
 		return nil, false
 	}
 
+	fsi.UserService = &UserServiceImpl{}
 	return fsi.GetUsersByids(ids, curId)
 }
 
