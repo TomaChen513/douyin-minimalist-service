@@ -45,6 +45,7 @@ func MessageChat(c *gin.Context) {
 	uId := user_id.(int64)
 	tuId, _ := strconv.ParseInt(toUserId, 10, 64)
 
+	print(uId, tuId)
 	var msi service.MessageServiceImpl
 
 	// 获取所有信息
@@ -55,8 +56,8 @@ func MessageChat(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK,MessageListResponse{
-		Response: Response{StatusCode: 0},
+	c.JSON(http.StatusOK, MessageListResponse{
+		Response:    Response{StatusCode: 0},
 		MessageList: messages,
 	})
 }
