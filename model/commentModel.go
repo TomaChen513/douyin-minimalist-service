@@ -46,3 +46,26 @@ func GetCommentListDecByTime(videoId int64) ([]Comment, error) {
 	}
 	return comments,nil
 }
+
+func CountCommentsByVideoId(videoId int64) (int64,error){
+	var comments []Comment
+	if err:=mysql.DB.Where("video_id=?",videoId).Find(&comments).Error;err!=nil {
+		log.Println(err.Error())
+		return -1,err
+	}
+	return int64(len(comments)),nil
+}
+
+func GetUserIdByVideoId(videoId int64) ([]int64,error){
+	var comments []Comment
+	if err:=mysql.DB.Where("video_id=?",videoId).Find(&comments).Error;err!=nil {
+		log.Println(err.Error())
+		return []int64{},err
+	}
+	res:=make([]int64,0)
+
+	for i := 0; i < len(comments); i++ {
+		res = append(res, comments[i].UserId)
+	}
+	return res,nil
+}

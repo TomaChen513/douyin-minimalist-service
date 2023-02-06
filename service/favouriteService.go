@@ -147,7 +147,7 @@ func (fvsi *FavorServiceImpl) GetFavouriteList(userId int64) ([]Video, error) {
 
 // ===============待编写测试文件====================
 // 点赞操作
-// 1. 对userId和videoId缓存进行添加操作，若无对应缓存key,则添加缓存，对点赞量缓存进行自增操作
+// 1. 对userId缓存进行添加操作，若无对应缓存key,则添加缓存，对点赞量缓存进行自增操作
 // 2. 并将数据库操作推入消息队列
 func (fvsi *FavorServiceImpl) likeAction(userId, videoId int64) bool {
 	strUserId := strconv.FormatInt(userId, 10)
@@ -242,6 +242,7 @@ func (fvsi *FavorServiceImpl) likeAction(userId, videoId int64) bool {
 }
 
 // ===============待编写测试文件====================
+// 缺少判断减到0的情况
 // 取消点赞操作
 func (fvsi *FavorServiceImpl) unLikeAction(userId, videoId int64) bool {
 	strUserId := strconv.FormatInt(userId, 10)
@@ -256,8 +257,8 @@ func (fvsi *FavorServiceImpl) unLikeAction(userId, videoId int64) bool {
 		}
 
 		// 将videoId加入缓存
-		if _, err1 := lib.RdbLikeUserId.SAdd(lib.Ctx, strUserId, strVideoId).Result(); err1 != nil {
-			log.Printf("方法:FavouriteAction RedisLikeUserId add value失败：%v", err1)
+		if _, err1 := lib.RdbLikeUserId.SRem(lib.Ctx, strUserId, strVideoId).Result(); err1 != nil {
+			log.Printf("方法:FavouriteAction RedisLikeUserId del value失败：%v", err1)
 			return false
 		} else {
 			// 若无错误，加入消息队列操作数据库
@@ -298,7 +299,7 @@ func (fvsi *FavorServiceImpl) unLikeAction(userId, videoId int64) bool {
 			}
 		}
 		if _, err2 := lib.RdbLikeUserId.SRem(lib.Ctx, strUserId, videoId).Result(); err2 != nil {
-			log.Printf("方法:FavouriteAction RedisLikeUserId add value失败：%v", err2)
+			log.Printf("方法:FavouriteAction RedisLikeUserId rem value失败：%v", err2)
 			return false
 		} else {
 			// 插入消息队列
@@ -310,7 +311,7 @@ func (fvsi *FavorServiceImpl) unLikeAction(userId, videoId int64) bool {
 		}
 	}
 
-	// RdbLikeVideoCount 先进行自增，若自增错误则删除上文插入redis的videoId
+	// RdbLikeVideoCount 先进行自减，若自增错误则删除上文插入redis的videoId
 	// 若不存在，则先新建缓存
 	if _, err := lib.RdbLikeVideoCount.Exists(lib.Ctx, strUserId).Result(); err != nil {
 		log.Printf("方法:FavouriteAction RedisLikeVideoCount 不存在：%v", err)
@@ -318,11 +319,6 @@ func (fvsi *FavorServiceImpl) unLikeAction(userId, videoId int64) bool {
 		// 若获取点赞出现错误则回退之前操作
 		if err1 != nil {
 			log.Printf("方法:FavouriteAction RedisLikeVideoCount 获取点赞错误：%v", err1)
-			_, err2 := lib.RdbLikeUserId.SRem(lib.Ctx, strUserId, videoId).Result()
-			if err2 != nil {
-				log.Printf("方法:FavouriteAction RedisLikeUserId 移除元素错误：%v", err1)
-				return false
-			}
 			return false
 		}
 	}
