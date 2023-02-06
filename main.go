@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/RaymondCode/simple-demo/lib"
+	"github.com/RaymondCode/simple-demo/lib/rabbitmq"
 	"github.com/RaymondCode/simple-demo/model/mysql"
 	"github.com/RaymondCode/simple-demo/router"
 )
@@ -22,6 +23,11 @@ func main() {
 	if err := r.Run(); err != nil {
 		log.Fatal("服务器启动失败...")
 	}
-	//test push
+	
+	
+	// 初始化rabbitMQ。
+	rabbitmq.InitRabbitMQ()
+	// 初始化Like的相关消息队列，并开启消费。
+	rabbitmq.InitLikeRabbitMQ()
 
 }

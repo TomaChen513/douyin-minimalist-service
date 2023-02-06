@@ -1,6 +1,7 @@
 package model
 
 import (
+	"errors"
 	"log"
 
 	"github.com/RaymondCode/simple-demo/model/mysql"
@@ -28,6 +29,20 @@ func InsertFavourite(like Like) bool{
 		return false
 	}
 	return true
+}
+
+// 更新点赞记录
+func UpdateLike(userId int64, videoId int64, actionType int32) error {
+	//更新当前用户观看视频的点赞状态“cancel”，返回错误结果
+	err := mysql.DB.Model(Like{}).Where(map[string]interface{}{"user_id": userId, "video_id": videoId}).
+		Update("cancel", actionType).Error
+	//如果出现错误，返回更新数据库失败
+	if err != nil {
+		log.Println(err.Error())
+		return errors.New("update data fail")
+	}
+	//更新操作成功
+	return nil
 }
 
 // 取消点赞，执行后删除点赞记录
@@ -63,3 +78,16 @@ func CountLikesByVideoId(videoId int64) (int64,error){
 	}
 	return int64(len(likes)),nil
 }
+
+// 根据userId和videoId查找
+func GetLike(userId,videoId int64) (Like,error){
+	like:=Like{}
+
+	if err:=mysql.DB.Where("user_id = ? AND video_id = ?", userId, videoId).
+	Find(&like).Error;err!=nil{
+		log.Println(err.Error())
+		return Like{},err
+	}
+	return like,nil
+}
+

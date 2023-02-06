@@ -9,6 +9,13 @@ import (
 	"github.com/RaymondCode/simple-demo/model"
 )
 
+// ==========待测试==========================
+// ==========待测试==========================
+// ==========待测试==========================
+// ==========待测试==========================
+
+
+
 type CommentService interface {
 	// 根据评论id删除评论，不缺定前端是否会判断该评论是否属于该用户，这里假设传来的评论id属于对应用户
 	DeleteComment(commentId, userId, videoId int64) bool
