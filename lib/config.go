@@ -12,6 +12,9 @@ var Cfg *ini.File
 // VideoCount 每次获取视频流的数量
 const VideoCount = 5
 
+// 设置Redis数据热度消散时间。
+var ExpireTime = time.Hour * 48
+
 // 服务端配置数据结构
 type ServerConfig struct {
 	RunMode      string

@@ -1,6 +1,10 @@
 package service
 
 import (
+	"strconv"
+	"time"
+
+	"github.com/RaymondCode/simple-demo/lib"
 	"github.com/RaymondCode/simple-demo/model"
 )
 
@@ -65,12 +69,12 @@ func (fsi *FollowServiceImp) GetFriendList(userId, curId int64) ([]User, bool) {
 
 // GetFollowingCnt 给定当前用户id，查询其关注者数量。
 func (*FollowServiceImp) GetFollowingCnt(userId int64) (int64, bool) {
-	// // 查看Redis中是否有关注数。
-	// if cnt, err := redis.RdbFollowing.SCard(redis.Ctx, strconv.Itoa(int(userId))).Result(); cnt > 0 {
-	// 	// 更新过期时间。
-	// 	redis.RdbFollowing.Expire(redis.Ctx, strconv.Itoa(int(userId)), config.ExpireTime)
-	// 	return cnt - 1, err
-	// }
+	// 查看Redis中是否有关注数。
+	if cnt, _ := lib.RdbFollowing.SCard(lib.Ctx, strconv.Itoa(int(userId))).Result(); cnt > 0 {
+		// 更新过期时间。
+		lib.RdbFollowing.Expire(lib.Ctx, strconv.Itoa(int(userId)), lib.ExpireTime)
+		return cnt - 1, false
+	}
 
 	// 用SQL查询。
 	ids, ok := model.GetFollowIds(userId)
@@ -78,10 +82,24 @@ func (*FollowServiceImp) GetFollowingCnt(userId int64) (int64, bool) {
 	if !ok {
 		return 0, false
 	}
-	// // 更新Redis中的followers和followPart
-	// go addFollowingToRedis(int(userId), ids)
+	// 更新Redis中的followers和followPart
+	go addFollowingToRedis(int(userId), ids)
 
 	return int64(len(ids)), true
+}
+
+func addFollowingToRedis(userId int, ids []int64) {
+	lib.RdbFollowers.SAdd(lib.Ctx, strconv.Itoa(userId), -1)
+	for i, id := range ids {
+		lib.RdbFollowers.SAdd(lib.Ctx, strconv.Itoa(userId), id)
+		lib.RdbFollowingPart.SAdd(lib.Ctx, strconv.Itoa(int(id)), userId)
+		lib.RdbFollowingPart.SAdd(lib.Ctx, strconv.Itoa(int(id)), -1)
+		// 更新部分关注者的时间
+		lib.RdbFollowingPart.Expire(lib.Ctx, strconv.Itoa(int(id)),
+			lib.ExpireTime+time.Duration((i%10)<<8))
+	}
+	// 更新followers的过期时间。
+	lib.RdbFollowers.Expire(lib.Ctx, strconv.Itoa(userId), lib.ExpireTime)
 }
 
 // GetFollowerCnt 给定当前用户id，查询其粉丝数量。
