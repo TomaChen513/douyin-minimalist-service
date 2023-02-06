@@ -90,16 +90,16 @@ func (videoService *VideoServiceImpl) creatVideo(video *Video, data *model.Video
 		// wg.Done()
 	}()
 
-	// //插入点赞数量，同上所示，不将nil直接向上返回，数据没有就算了，给一个默认就行了
-	// go func() {
-	// 	video.FavoriteCount, err = videoService.FavouriteCount(data.Id)
-	// 	if err != nil {
-	// 		log.Printf("方法videoService.FavouriteCount(data.ID) 失败：%v", err)
-	// 	} else {
-	// 		log.Printf("方法videoService.FavouriteCount(data.ID) 成功")
-	// 	}
-	// 	wg.Done()
-	// }()
+	//插入点赞数量，同上所示，不将nil直接向上返回，数据没有就算了，给一个默认就行了
+	go func() {
+		video.FavoriteCount, err = videoService.FavouriteCount(data.Id)
+		if err != nil {
+			log.Printf("方法videoService.FavouriteCount(data.ID) 失败：%v", err)
+		} else {
+			log.Printf("方法videoService.FavouriteCount(data.ID) 成功")
+		}
+		// wg.Done()
+	}()
 
 	// //获取该视屏的评论数字
 	// go func() {

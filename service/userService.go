@@ -156,10 +156,10 @@ func (usi *UserServiceImpl) GetUserByIdWithCurId(id int64, curId int64) (User, e
 		return user, err
 	}
 	log.Println("Query User Success")
-	followCount, _ := usi.GetFollowingCnt(id)
-	// if err != nil {
-	// 	log.Println("Err:", err.Error())
-	// }
+	followCount, flag := usi.GetFollowingCnt(id)
+	if !flag {
+		log.Println("Err: usi.GetFollowingCnt(id) err")
+	}
 	followerCount := usi.GetFollowerCnt(id)
 	// if err != nil {
 	// 	log.Println("Err:", err.Error())

@@ -35,7 +35,7 @@ func GetVideosById(videoId []int64) ([]Video, error) {
 }
 
 // 把视频上传到oss
-func VideoOss(file io.Reader, videoName string) error {
+func VideoOss(file io.Reader, videoName string, imageName string) error {
 	conf := lib.LoadServerConfig()
 	// 创建OSSClient实例。
 	client, err := oss.New(conf.Endpoint, conf.AccessKeyID, conf.AccessKeySecret)
@@ -51,13 +51,23 @@ func VideoOss(file io.Reader, videoName string) error {
 	}
 
 	// 上传文件。
-	err = bucket.PutObject(videoName+".mp4", file)
+	err = bucket.PutObject(videoName, file)
 	if err != nil {
-		fmt.Println("文件上传Error:", err)
+		fmt.Println("视频文件上传Error:", err)
 		return err
 	}
+	fmt.Println("视频上传文件成功!")
 
-	fmt.Println("上传文件成功！")
+	coverImg := lib.GetSnapshot(videoName, imageName, 1)
+	fmt.Println("封面文件生成成功!")
+
+	err = bucket.PutObject(imageName, coverImg)
+	if err != nil {
+		fmt.Println("封面文件上传Error:", err)
+		return err
+	}
+	fmt.Println("封面上传文件成功!")
+
 	return nil
 }
 
@@ -80,8 +90,8 @@ func GetVideosByAuthorId(authorId int64) ([]Video, error) {
 func Save(videoName string, imageName string, authorId int64, title string) error {
 	var video Video
 	video.PublishTime = time.Now()
-	video.PlayUrl = "https://douyinmiaomiao.oss-cn-hangzhou.aliyuncs.com/" + videoName + ".mp4"
-	video.CoverUrl = "https://douyinmiaomiao.oss-cn-hangzhou.aliyuncs.com/" + imageName + ".jpg"
+	video.PlayUrl = "https://douyinmiaomiao.oss-cn-hangzhou.aliyuncs.com/" + videoName
+	video.CoverUrl = "https://douyinmiaomiao.oss-cn-hangzhou.aliyuncs.com/" + imageName
 	video.AuthorId = authorId
 	video.Title = title
 	result := mysql.DB.Save(&video)

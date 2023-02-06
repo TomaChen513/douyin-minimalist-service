@@ -47,9 +47,11 @@ func Publish(c *gin.Context) {
 	log.Printf("生成视频名称%v", videoName)
 
 	//封面图片名称（暂时）
-	imageName := videoName
+	imageName := videoName + ".jpg"
+	videoName = videoName + ".mp4"
 
-	err = model.VideoOss(file, videoName)
+	//将视频和封面上传到oss
+	err = model.VideoOss(file, videoName, imageName)
 	if err != nil {
 		log.Printf("方法videoService.Publish(data, userId) 失败：%v", err)
 		c.JSON(http.StatusOK, Response{
@@ -74,7 +76,7 @@ func Feed(c *gin.Context) {
 	inputTime := c.Query("latest_time")
 	log.Printf("传入的时间" + inputTime + "end")
 	var lastTime time.Time
-	if inputTime != "" && inputTime!="0"{
+	if inputTime != "" && inputTime != "0" {
 		me, _ := strconv.ParseInt(inputTime, 10, 64)
 		lastTime = time.Unix(me, 0)
 	} else {
