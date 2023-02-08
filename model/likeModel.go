@@ -11,7 +11,6 @@ type Like struct {
 	Id      int64 `gorm:"primarykey" json:"id,omitempty"`
 	UserId  int64 `json:"user_id,omitempty"`
 	VideoId int64 `json:"video_id,omitempty"`
-	// cancel字段暂时不使用
 	Cancel  int64 
 }
 

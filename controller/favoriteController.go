@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/RaymondCode/simple-demo/lib/rabbitmq"
 	"github.com/RaymondCode/simple-demo/service"
 	"github.com/gin-gonic/gin"
 )
@@ -28,6 +29,10 @@ func FavoriteAction(c *gin.Context) {
 	}
 	log.Printf("service.FavoriteAction(uId, vId, actionType) 成功")
 	c.JSON(http.StatusOK, Response{StatusCode: 0, StatusMsg: "点赞操作成功！"})
+}
+
+func TestAction(c *gin.Context){
+	rabbitmq.LikeDel.PublishSimple("1 2")
 }
 
 // 不知道为啥一直返回空数组， 可能我测试有问题

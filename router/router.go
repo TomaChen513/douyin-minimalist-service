@@ -23,7 +23,8 @@ func SetupRoute() *gin.Engine {
 
 	// extra apis - I
 
-	apiRouter.POST("/favorite/action/", middleware.JwtAuth(), controller.FavoriteAction)
+	// apiRouter.POST("/favorite/action/", middleware.JwtAuth(), controller.FavoriteAction)
+	apiRouter.POST("/favorite/action/", middleware.JwtAuth(), controller.TestAction)
 	apiRouter.GET("/favorite/list/", middleware.JwtAuth(), controller.FavoriteList)
 	apiRouter.POST("/comment/action/", middleware.JwtAuth(), controller.CommentAction)
 	apiRouter.GET("/comment/list/", middleware.JwtAuth(), controller.CommentList)

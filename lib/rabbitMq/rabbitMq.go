@@ -3,39 +3,39 @@ package rabbitmq
 import (
 	"fmt"
 	"github.com/streadway/amqp"
-	"log"
 )
 
 const MQURL = "amqp://tiktok:tiktok@121.5.231.228:5672/"
 
+
 type RabbitMQ struct {
-	conn  *amqp.Connection
-	mqurl string
+	//连接
+	conn    *amqp.Connection
+	channel *amqp.Channel
+	//队列
+	QueueName string
+	//交换机名称
+	ExChange string
+	//绑定的key名称
+	Key string
+	//连接的信息，上面已经定义好了
+	MqUrl string
 }
 
-var Rmq *RabbitMQ
-
-// InitRabbitMQ 初始化RabbitMQ的连接和通道。
-func InitRabbitMQ() {
-
-	Rmq = &RabbitMQ{
-		mqurl: MQURL,
-	}
-	dial, err := amqp.Dial(Rmq.mqurl)
-	Rmq.failOnErr(err, "创建连接失败")
-	Rmq.conn = dial
-
+//创建结构体实例，参数队列名称、交换机名称和bind的key（也就是几个大写的，除去定义好的常量信息）
+func NewRabbitMQ(queueName string, exChange string, key string) *RabbitMQ {
+	return &RabbitMQ{QueueName: queueName, ExChange: exChange, Key: key, MqUrl: MQURL}
 }
 
-// 连接出错时，输出错误信息。
+//关闭conn和chanel的方法
+func (r *RabbitMQ) Destory() {
+	r.channel.Close()
+	r.conn.Close()
+}
+
+//错误的函数处理
 func (r *RabbitMQ) failOnErr(err error, message string) {
 	if err != nil {
-		log.Fatalf("%s:%s\n", err, message)
-		panic(fmt.Sprintf("%s:%s\n", err, message))
+		fmt.Printf("err是:%s,小杜同学手写的信息是:%s", err, message)
 	}
-}
-
-// 关闭mq通道和mq的连接。
-func (r *RabbitMQ) destroy() {
-	r.conn.Close()
 }
