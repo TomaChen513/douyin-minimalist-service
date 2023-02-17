@@ -7,13 +7,12 @@ import (
 )
 
 // Follow 用户关系结构，对应用户关系表。
-// userid=1, followerid=2, cancel=1, 表示用户1关注用户2
+// userid=1, followerid=2, cancel=1, 表示用户2关注用户1
 type Follow struct {
 	Id         int64 `gorm:"primaryKey"`
 	UserId     int64
 	FollowerId int64
-	//1表示关注， 2表示不关注 user-->follower
-	Cancel int8
+	Cancel     int8
 }
 
 // TableName 设置Follow结构体对应数据库表名。
@@ -21,7 +20,7 @@ func (Follow) TableName() string {
 	return "follows"
 }
 
-// 查询user是否关注follower
+// 查询是否关注
 func IsFollow(userId, followerId int64) bool {
 	var cnt int64
 
@@ -53,7 +52,7 @@ func GetFollow(userId, followerId int64) int64 {
 	return follow.Id
 }
 
-// 插入一条新数据, 成功返回true， 失败返回false
+// 插入一条新数据
 func InsertFollow(userId, followerId int64, cancel int8) bool {
 	follow := Follow{UserId: userId, FollowerId: followerId, Cancel: cancel}
 	if err := mysql.DB.Create(&follow).Error; err != nil {
@@ -64,7 +63,7 @@ func InsertFollow(userId, followerId int64, cancel int8) bool {
 	return true
 }
 
-// 修改数据, 成功返回true， 失败返回false
+// 修改数据
 func UpdateFollow(id int64, cancel int8) bool {
 	if err := mysql.DB.
 		Model(&Follow{}).
@@ -82,7 +81,7 @@ func GetFollowerCount(userId int64) int64 {
 	var cnt int64
 	//查询失败， 返回-1
 	if err := mysql.DB.Model(Follow{}).
-		Where("follower_id = ?", userId).
+		Where("user_id = ?", userId).
 		Where("cancel = ?", 1).
 		Count(&cnt).Error; err != nil {
 		log.Println(err.Error())
@@ -97,9 +96,9 @@ func GetFollowerIds(userId int64) ([]int64, bool) {
 	var ids []int64
 	if err := mysql.DB.
 		Model(Follow{}).
-		Where("follower_id = ?", userId).
+		Where("user_id = ?", userId).
 		Where("cancel = ?", 1).
-		Pluck("user_id", &ids).Error; nil != err {
+		Pluck("follower_id", &ids).Error; nil != err {
 		// 没有关注任何人，但是不能算错。
 		if err.Error() == "record not found" {
 			return nil, true
@@ -118,7 +117,7 @@ func GetFollowCount(userId int64) int64 {
 	// 查询失败, 返回-1
 	if err := mysql.DB.
 		Model(Follow{}).
-		Where("user_id = ?", userId).
+		Where("follower_id = ?", userId).
 		Where("cancel = ?", 1).
 		Count(&cnt).Error; err != nil {
 		log.Println(err.Error())
@@ -133,9 +132,9 @@ func GetFollowIds(userId int64) ([]int64, bool) {
 	var ids []int64
 	if err := mysql.DB.
 		Model(Follow{}).
-		Where("user_id = ?", userId).
+		Where("follower_id = ?", userId).
 		Where("cancel = ?", 1).
-		Pluck("follower_id", &ids).Error; err != nil {
+		Pluck("user_id", &ids).Error; err != nil {
 		// 没有粉丝，但是不能算错
 		if err.Error() == "record not found" {
 			return nil, true
@@ -150,6 +149,7 @@ func GetFollowIds(userId int64) ([]int64, bool) {
 
 // 获取好友id
 func GetFriendIds(userId int64) ([]int64, bool) {
+	//先获取关注列表
 	followIds, ok := GetFollowIds(userId)
 
 	if !ok {
@@ -159,7 +159,7 @@ func GetFriendIds(userId int64) ([]int64, bool) {
 	var ids = make([]int64, 0, len(followIds))
 
 	for _, id := range followIds {
-		if IsFollow(id, userId) {
+		if IsFollow(userId, id) {
 			ids = append(ids, id)
 		}
 	}

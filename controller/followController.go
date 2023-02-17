@@ -8,12 +8,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// 关注操作 userId表示当前用户Id, followerId, 表示关注对象
+// 关注操作 followerId关注userId
 // 1. 没有考虑to_user_id不存在的情况(已修改)  2. 可以直接取消关注，即用户没有关注的时候，都可以取关（已修改）
 func RelationAction(c *gin.Context) {
-	user_id, _ := c.Get("userId")
-	userId := user_id.(int64)
-	followerId, err1 := strconv.ParseInt(c.Query("to_user_id"), 10, 64)
+	uId, _ := c.Get("userId")
+	followerId := uId.(int64)
+	userId, err1 := strconv.ParseInt(c.Query("to_user_id"), 10, 64)
 	cancel, err2 := strconv.ParseInt(c.Query("action_type"), 10, 64)
 
 	//判断参数格式
@@ -35,7 +35,7 @@ func RelationAction(c *gin.Context) {
 
 	fsi := service.FollowServiceImp{UserService: &service.UserServiceImpl{}}
 
-	_, err3 := fsi.GetUserById(followerId)
+	_, err3 := fsi.GetUserById(userId)
 
 	if err3 != nil {
 		c.JSON(200, gin.H{

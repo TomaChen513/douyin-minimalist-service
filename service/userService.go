@@ -22,8 +22,6 @@ type UserService interface {
 	ValidPassword(id int64, password string) bool
 	// 根据姓名获取用户
 	GetUserByName(userName string) (User, error)
-	// 根据id获得用户详细信息, curId表示当前登录的Id
-	GetUserInfoById(id, curId int64) (User, bool)
 	// 根据ids获取users, curId表示当前用户id
 	GetUsersByids(ids []int64, curId int64) ([]User, bool)
 	// InsertTableUser 将tableUser插入表内
@@ -78,48 +76,12 @@ func (usi *UserServiceImpl) GetUserByName(userName string) (User, error) {
 	}, nil
 }
 
-// 根据id获得用户详细信息, curId表示当前登录的Id
-func (usi *UserServiceImpl) GetUserInfoById(id, curId int64) (User, bool) {
-	name := model.GetNameById(id)
-	//println(name)
-	if name == "" {
-		return User{}, false
-	}
-
-	followCount := model.GetFollowCount(id)
-	//println(followCount)
-	if followCount == -1 {
-		return User{}, false
-	}
-
-	followerCount := model.GetFollowerCount(id)
-	//println(followerCount)
-	if followerCount == -1 {
-		return User{}, false
-	}
-
-	isFollow := model.IsFollow(curId, id)
-	println(isFollow)
-	if !isFollow {
-		return User{}, false
-	}
-
-	return User{
-		Id:            id,
-		Name:          name,
-		FollowCount:   followCount,
-		FollowerCount: followerCount,
-		IsFollow:      isFollow,
-	}, true
-	//return User{}, true
-}
-
 // 根据ids获取users, curId表示当前用户id
 func (usi *UserServiceImpl) GetUsersByids(ids []int64, curId int64) ([]User, bool) {
 	var users = make([]User, 0, len(ids))
 
 	for _, id := range ids {
-		if user, ok := usi.GetUserInfoById(id, curId); !ok {
+		if user, err := usi.GetUserByIdWithCurId(id, curId); err != nil {
 			return nil, false
 		} else {
 			users = append(users, user)
