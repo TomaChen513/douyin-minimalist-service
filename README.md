@@ -1,7 +1,23 @@
-# simple-demo
+# douyin-project
+
+## 技术要点
+
+1. 视频存储在阿里oss上，同时视频封面的截图采用ffmpeg
+
+2. 使用了redis，mysql两种数据库，使用rabbitmq消息队列
+
+## 分工说明
+组长： 陈新宇  负责互动接口和社交接口的消息部分，具体说明见文档
+
+互动模块：https://d5gt5a2i7b.feishu.cn/docx/T1wId72vzonhdLxOlF6czS0fnZg
+
+消息模块：https://d5gt5a2i7b.feishu.cn/docx/JMHwdgxmyoG47tx00B9cWudonqe
+
+王子晨： 负责基础接口模块
+
+陈鑫： 负责社交接口模块
 
 ### 说明
-###TESTTTTTT
 router注册路由，controller层按模块分为五个文件，各自负责各自的部分。
 
 controller命名规则：模块名加Controller，例如：videoController.go
@@ -59,12 +75,4 @@ https://bytedance.feishu.cn/docs/doccnKrCsU5Iac6eftnFBdsXTof#
 https://bytedance.feishu.cn/docs/doccnM9KkBAdyDhg8qaeGlIz7S7
 https://www.apifox.cn/apidoc/shared-09d88f32-0b6c-4157-9d07-a36d32d7a75c/api-50707530
 
-
-
-
-### 进度汇总
-
-重构了代码架构以及添加了mysql、redis数据库
-
-添加了用户注册、登录、信息的路由,提出了相关issure
 
