@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/RaymondCode/simple-demo/lib"
-	"github.com/RaymondCode/simple-demo/lib/rabbitmq"
+	// "github.com/RaymondCode/simple-demo/lib/rabbitmq"
 	"github.com/RaymondCode/simple-demo/model/mysql"
 	"github.com/RaymondCode/simple-demo/router"
 )
@@ -21,7 +21,7 @@ func main() {
 
 
 	// 初始化Like的相关消息队列，并开启消费。
-	rabbitmq.InitLikeRabbitMQ()
+	// rabbitmq.InitLikeRabbitMQ()
 
 	// 启动服务
 	if err := r.Run(); err != nil {
