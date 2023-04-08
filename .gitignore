@@ -27,4 +27,5 @@ go.work
 .idea
 .DS_Store
 *conf
+conf
 .VSCodeCounter
