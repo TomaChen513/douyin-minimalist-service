@@ -33,6 +33,7 @@ type ServerConfig struct {
 	// redis
 	RedisHost  string
 	RedisIndex string
+	RedisPassword string
 
 	// oss
 	AccessKeyID     string
@@ -46,7 +47,7 @@ func LoadServerConfig() ServerConfig {
 
 	var err error
 
-	Cfg, err = ini.Load("./conf/app.ini")
+	Cfg, err = ini.Load("/Users/toma/Projects/GoLearning/douyin-minimalist-service/conf/app.ini")
 	if err != nil {
 		log.Fatal(2, "Fail to parse 'conf/app.ini': %v", err)
 	}
@@ -81,6 +82,7 @@ func LoadServerConfig() ServerConfig {
 		// redis
 		RedisHost:  redis.Key("HOST").MustString(""),
 		RedisIndex: redis.Key("INDEX").MustString(""),
+		RedisPassword: redis.Key("PASSWORD").MustString(""),
 
 		// oss
 		AccessKeyID:     oss.Key("ACCESS_KEY_ID").MustString(""),
