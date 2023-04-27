@@ -11,22 +11,22 @@ import (
 
 func main() {
 	// 加载配置
-	serverConfig := lib.LoadServerConfig()
-	// 初始化数据库
-	mysql.InitDB(serverConfig)
-	defer mysql.DB.Close()
+	// serverConfig := lib.LoadServerConfig()
+	// // 初始化数据库
+	// mysql.InitDB(serverConfig)
+	// defer mysql.DB.Close()
 
-	// 设置路由
-	r := router.SetupRoute()
+	// // 设置路由
+	// r := router.SetupRoute()
 
 
-	// 初始化Like的相关消息队列，并开启消费。
-	// rabbitmq.InitLikeRabbitMQ()
+	// // 初始化Like的相关消息队列，并开启消费。
+	// // rabbitmq.InitLikeRabbitMQ()
 
-	// 启动服务
-	if err := r.Run(); err != nil {
-		log.Fatal("服务器启动失败...")
-	}
+	// // 启动服务
+	// if err := r.Run(); err != nil {
+	// 	log.Fatal("服务器启动失败...")
+	// }
 	
 	
 
